@@ -107,6 +107,9 @@ class Experiment:
         else:
             raise ValueError('Experiment must be \'regression\' or \'classification\', cannot be {}'.format(str(exp_type)))
 
+    def getExperimentType(self):
+        return self.type_of_experiment
+
     def getDefaultVersionOf(self, model_name):
         # TO-DO: Contact state object to get the object!
         # Do we know what type of experiment we're dealing with here?

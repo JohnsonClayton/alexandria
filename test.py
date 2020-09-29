@@ -1,9 +1,12 @@
 from experiments import Experiments, Experiment
 from utils import Helper
+from model import Model
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeRegressor
 from abc import ABCMeta
+
+from sklearn.datasets import make_classification
 
 import sys
 
@@ -22,6 +25,9 @@ class TestExperiment(unittest.TestCase):
 
         experiment_type = 'bloogus!'
         self.assertEqual( experiment.isValidExperimentType(experiment_type), False )
+    def test_setExperimentType(self):
+        experiment = Experiment()
+        experiment_type = 'bloogus!'
         try:
             experiment.setExperimentType(experiment_type)
 
@@ -29,6 +35,11 @@ class TestExperiment(unittest.TestCase):
             self.assertEqual(0, 1)
         except ValueError as ve:
             self.assertEqual( str(ve), 'Experiment must be \'regression\' or \'classification\', cannot be bloogus!' )
+
+        experiment_type = 'classification'
+        experiment.setExperimentType(experiment_type)
+       
+        self.assertEqual( experiment.getExperimentType(), experiment_type )
 
 class TestExperiments(unittest.TestCase):
     def test_init(self):
@@ -104,6 +115,46 @@ class TestHelper(unittest.TestCase):
         
         model = model(**args)
         self.assertEqual( type(model), DecisionTreeRegressor )
+
+class TestModel(unittest.TestCase):
+    def test_init(self):
+        model = Model()
+        self.assertEqual( model.getName(), None )
+
+
+    def test_setConstructor(self):
+        model = Model('best name ever!', lambda x : x**2, {'x':1})
+        self.assertEqual( model.getConstructor()(5), 25 )
+        self.assertEqual( model.getConstructor()(4), 16 )
+        self.assertEqual( model.getConstructorArgs(), {'x':1} )
+
+        model.setConstructor( lambda x : x**3 )
+        self.assertEqual( model.getConstructor()(3), 27 )
+        self.assertEqual( model.getConstructor()(1), 1 )
+        self.assertEqual( model.getConstructor()(4), 64 )
+
+        model.setConstructor()
+        self.assertEqual( model.getConstructor(), None )
+        model.setConstructor(None)
+        self.assertEqual( model.getConstructor(), None )
+        
+        try:
+            model.setConstructor('the lazy brown dog jumped over the fox')
+
+            # This should never run!
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Model \'best name ever!\' cannot set constructor as non-callable value: the lazy brown dog jumped over the fox')
+
+    def test_run(self):
+        model = Model(name='rf1', constr=RandomForestClassifier, constr_args={'max_depth': 2, 'random_state': 0})
+
+        # Creating small dataset as per https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+        X, y = make_classification(n_samples=1000, n_features=4,
+                n_informative=2, n_redundant=0,
+                random_state=0, shuffle=False)
+        model.run(X=X, y=y)
+        self.assertEqual( model.predict( [[0, 0, 0, 0]] ), [1] )
 
         
 
