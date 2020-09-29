@@ -18,8 +18,7 @@ This is a high-level machine learning framework that (will) allow for the users 
                             'conf_matrix'
                   ])
 > experiment_1.setRandomState(0)
-> experiment_1.setDataset(X, y)
-> experiment_1.run(cv=True, n_folds=10)
+> experiment_1.run(X, y, cv=True, n_folds=10)
 Running...done
 > metrics = experiment_1.collectMetrics()
 > metrics.present()
