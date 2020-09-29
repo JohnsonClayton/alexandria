@@ -6,24 +6,47 @@ class Experiments:
     '''
     def __init__(self, experiments=[]):
         # Keep track of all of the experiment objects for this experiment
-        self.experiment_list = []
+        self.experiment_dict = {}
 
         if type(experiments) == list and len(experiments) > 0:
             # TO-DO: Should we check if these are legitimate experiment objects? - Probably
-            self.experiment_list = experiments 
+            for exp in experiments:
+                self.addExperiment(exp)
 
         # Keep constants around
         self.default_experiment_name = 'experiment_'
-        self.num_of_experiments = len(self.experiment_list)
+        self.num_of_experiments = len(self.experiment_dict)
 
-    def getDefaultExperimentName():
+    def getDefaultExperimentName(self):
         return self.default_experiment_name + str(self.num_of_experiments)
 
     def addExperiment(self, experiment):
         if type(experiment) == Experiment:
-            self.experiment_list.append(experiment)
+            exp_name = experiment.getName()
+            if exp_name == 'unnamed experiment':
+                # Set its name to the default name. Do NOT change the experiment object's name
+                exp_name = self.getDefaultExperimentName() 
+
+            # Set the experiment as the value to it's own name
+            self.experiment_dict[exp_name] = experiment
         else:
             raise ValueError('Object must be Experiment object: {}'.format(str(experiment)))
+
+    def runAllExperiments(self):
+        if len(self.experiment_dict.keys()) > 0:
+            for experiment in self.experiment_dict.keys():
+                experiment.run()
+        else:
+            raise ValueError('Experiments object has no models to run!')
+
+    def getNumOfExperiments(self):
+        return len(self.experiment_dict)
+
+    def getExperiments(self):
+        return self.experiment_dict
+
+    def getExperimentNames(self):
+        return list(self.experiment_dict.keys())
 
 
 class Experiment:
@@ -32,12 +55,12 @@ class Experiment:
             if name != '':
                 self.name = name
             else:
-                self.name = None
+                self.name = 'unnamed_experiment'
         else:
             raise ValueError('Experiment name attribute must be string: {}'.format(str(name)))
 
         # initialize the dictionary of models within the experiment
-        self.model_list = {}
+        self.models_dict = {}
 
         # Add the models (if any) that the user wants to use
         if type(models) is list:
@@ -45,7 +68,7 @@ class Experiment:
                 # Then add all of the model objects to the experiment
                 for model in models:
                     self.addModel(model)
-            else:
+            elif len(models) == 1:
                 # Add the only model to the experiment list
                 self.addModel(models)
         elif type(models) is dict:
@@ -58,7 +81,7 @@ class Experiment:
             raise ValueError('Models must be in list format if more than one is provided. Ex. models=[\'rf\', \'Decision Tree\', RandomForestClassifer()... ]')
 
     def getDefaultModelName(self):
-        return 'exp_' + str(len(self.model_list))
+        return 'exp_' + str(len(self.models_dict))
 
     def getDefaultVersionOf(self, model):
         # TO-DO: Contact state object to get the object!
@@ -84,10 +107,18 @@ class Experiment:
         else:
             raise ValueError('Model name must be string: {}'.format(str(name)))
 
-        self.model_list[name] = model
+        self.models_dict[name] = model
+
+    def run(self):
+        self.completed = True
 
     def setRandomState(self, rand_state):
         if type(rand_state) == int:
             self.random_state = rand_state
         else:
             raise ValueError('random state must be integer: {}'.format(rand_state))
+
+    def getName(self):
+        return self.name
+    def getModels(self):
+        return self.models_dict
