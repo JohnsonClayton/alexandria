@@ -15,6 +15,21 @@ class TestExperiment(unittest.TestCase):
         self.assertEqual( experiment.getName(), 'unnamed_experiment' )
         self.assertEqual( experiment.getModels(), {} )
 
+    def test_isValidExperimentType(self):
+        experiment = Experiment()
+        experiment_type = 'classification'
+        self.assertEqual( experiment.isValidExperimentType(experiment_type), True )
+
+        experiment_type = 'bloogus!'
+        self.assertEqual( experiment.isValidExperimentType(experiment_type), False )
+        try:
+            experiment.setExperimentType(experiment_type)
+
+            # This should never run!
+            self.assertEqual(0, 1)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Experiment must be \'regression\' or \'classification\', cannot be bloogus!' )
+
 class TestExperiments(unittest.TestCase):
     def test_init(self):
         experiments = Experiments()
@@ -54,6 +69,7 @@ class TestExperiments(unittest.TestCase):
 
         self.assertEqual( experiments.getNumOfExperiments(), 4 )
         self.assertEqual( experiments.getExperimentNames(), ['1', '2', '3', '4'] )
+
 
 class TestHelper(unittest.TestCase):
     def test_init(self):

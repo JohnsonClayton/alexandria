@@ -1,5 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier
 
+from utils import Helper
+
 class Experiments:
     '''
     Experiments object keeps track of all experiment objects provided
@@ -50,7 +52,14 @@ class Experiments:
 
 
 class Experiment:
-    def __init__(self, name='', models=[]):
+    def __init__(self, name='', models=[], exp_type=None):
+        self.helper = Helper()
+    
+        self.type_of_experiment = None
+        if exp_type:
+            if self.isValidExperimentType(exp_type):
+                self.type_of_experiment = exp_type
+
         if type(name) is str:
             if name != '':
                 self.name = name
@@ -83,9 +92,33 @@ class Experiment:
     def getDefaultModelName(self):
         return 'exp_' + str(len(self.models_dict))
 
-    def getDefaultVersionOf(self, model):
+    def isValidExperimentType(self, exp_type):
+        if type(exp_type) == str:
+            if exp_type == 'regression' or exp_type == 'classification':
+                return True
+            else:
+                return False
+        else:
+            raise ValueError('Experiment type must be string: {}'.format(str(exp_type)))
+
+    def setExperimentType(self, exp_type):
+        if self.isValidExperimentType(exp_type):
+            self.type_of_experiment = exp_type
+        else:
+            raise ValueError('Experiment must be \'regression\' or \'classification\', cannot be {}'.format(str(exp_type)))
+
+    def getDefaultVersionOf(self, model_name):
         # TO-DO: Contact state object to get the object!
-        return DecisionTreeClassifier()
+        # Do we know what type of experiment we're dealing with here?
+        if self.type_of_experiment:
+            # Figure out what type of model we need
+            if self.type_of_experiment == 'regression':
+                model_name = model_name + ':regressor'
+            elif self.type_of_experiment == 'classification':
+                model_name = model_name + ':classifier'
+            return Model( model_name, self.helper.getDefaultModel(model_name), self.helper.getDefaultArgs(model_name) ) 
+        else:
+            return Model( model_name )
 
     def addModel(self, model, name=''):
         # TO-DO: What are valid objects to pass here? String? Yes, but gives default. Actual model object (such as RandomForestClassifier)? Yes!
