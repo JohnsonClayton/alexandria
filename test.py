@@ -3,10 +3,10 @@ from utils import Helper
 from model import Model
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from abc import ABCMeta
 
-from sklearn.datasets import make_classification
+from sklearn.datasets import load_iris, make_classification
 
 import sys
 
@@ -25,6 +25,18 @@ class TestExperiment(unittest.TestCase):
 
         experiment_type = 'bloogus!'
         self.assertEqual( experiment.isValidExperimentType(experiment_type), False )
+
+    def test_addModel(self):
+        experiment = Experiment('experiment_1')
+        experiment.addModel('rf')
+        dt_model = Model('decision tree', DecisionTreeClassifier, {'random_state': 0, 'max_depth': 2})
+        experiment.addModel(dt_model)
+
+        models_dict = experiment.getModels()
+
+        print(models_dict)
+        self.assertTrue( 'rf' in models_dict )
+
     def test_setExperimentType(self):
         experiment = Experiment()
         experiment_type = 'bloogus!'
@@ -40,6 +52,44 @@ class TestExperiment(unittest.TestCase):
         experiment.setExperimentType(experiment_type)
        
         self.assertEqual( experiment.getExperimentType(), experiment_type )
+
+    def test_run(self):
+        experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
+        iris = load_iris()
+
+        experiment.run(iris.data[:120], iris.target[:120])
+
+        try:
+            experiment.run(iris.data[:120], iris.target[:12])
+
+            # This should never be executed!
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Data and target provided to \'exp1\' must be same length:\n\tlen of data: 120\n\tlen of target: 12' )
+
+        experiment = Experiment(models=['rf', 'dt'], exp_type='classification')
+        experiment.run(iris.data[:120], iris.target[:120])
+
+        try:
+            experiment.run(iris.data[:47], iris.target)
+
+            # This should never be executed!
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Data and target provided to \'unnamed_experiment\' must be same length:\n\tlen of data: 47\n\tlen of target: 150' )
+
+    def test_predict(self):
+        experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
+        iris = load_iris()
+
+        experiment.run(iris.data[:120], iris.target[:120])
+        predictions = experiment.predict(iris.data[120:])
+        actual = {
+                'rf':
+                    [2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 
+                'dt':
+                    [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]}
+        self.assertEqual( predictions, actual )
 
 class TestExperiments(unittest.TestCase):
     def test_init(self):
@@ -154,9 +204,20 @@ class TestModel(unittest.TestCase):
                 n_informative=2, n_redundant=0,
                 random_state=0, shuffle=False)
         model.run(X=X, y=y)
-        self.assertEqual( model.predict( [[0, 0, 0, 0]] ), [1] )
+        self.assertListEqual( model.predict( [[0, 0, 0, 0]] ), [1] )
 
-        
+        model = Model('dt1', DecisionTreeClassifier, {'random_state':0})
+        iris = load_iris()
+        model.run( iris.data[:120], iris.target[:120] )
+        self.assertListEqual( model.predict( iris.data[120:] ), [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2] )
+
+        try:
+            model.run( iris.data[:120], iris.target[:119] )
+
+            # This should never execute!
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Model dt1 cannot be trained when data and target are different lengths:\n\tlen of data: 120\n\tlen of target: 119' )
 
 if __name__ == '__main__':
     unittest.main()

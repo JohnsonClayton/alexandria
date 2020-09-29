@@ -43,9 +43,15 @@ class Model:
             raise ValueError('Name must be string type: {}'.format(name))
 
     def run(self, X, y, metrics=[]):
-        self.model = self.constructor(**self.constructor_args)
-        self.model.fit(X, y)
+        if len(X) == len(y):
+            self.model = self.constructor(**self.constructor_args)
+            self.model.fit(X, y)
+        else:
+            if self.name:
+                raise ValueError('Model {} cannot be trained when data and target are different lengths:\n\tlen of data: {}\n\tlen of target: {}'.format(self.name, str(len(X)), str(len(y))))
+            else:
+                raise ValueError('Model cannot be trained when data and target are different lengths:\n\tlen of data: {}\n\tlen of target: {}'.format(str(len(X)), str(len(y))))
 
     def predict(self, X):
         if self.model:
-            return self.model.predict( X )
+            return list(self.model.predict( X ))

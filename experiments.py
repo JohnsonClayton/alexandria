@@ -1,6 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier
 
 from utils import Helper
+from model import Model
 
 class Experiments:
     '''
@@ -54,6 +55,7 @@ class Experiments:
 class Experiment:
     def __init__(self, name='', models=[], exp_type=None):
         self.helper = Helper()
+        self.unnamed_model_count = 0
     
         self.type_of_experiment = None
         if exp_type:
@@ -90,7 +92,7 @@ class Experiment:
             raise ValueError('Models must be in list format if more than one is provided. Ex. models=[\'rf\', \'Decision Tree\', RandomForestClassifer()... ]')
 
     def getDefaultModelName(self):
-        return 'exp_' + str(len(self.models_dict))
+        return 'model_' + str(len(self.models_dict))
 
     def isValidExperimentType(self, exp_type):
         if type(exp_type) == str:
@@ -116,10 +118,10 @@ class Experiment:
         if self.type_of_experiment:
             # Figure out what type of model we need
             if self.type_of_experiment == 'regression':
-                model_name = model_name + ':regressor'
+                regularized_model_name = model_name + ':regressor'
             elif self.type_of_experiment == 'classification':
-                model_name = model_name + ':classifier'
-            return Model( model_name, self.helper.getDefaultModel(model_name), self.helper.getDefaultArgs(model_name) ) 
+                regularized_model_name = model_name + ':classifier'
+            return Model( model_name, self.helper.getDefaultModel(regularized_model_name), self.helper.getDefaultArgs(regularized_model_name) ) 
         else:
             return Model( model_name )
 
@@ -127,14 +129,29 @@ class Experiment:
         # TO-DO: What are valid objects to pass here? String? Yes, but gives default. Actual model object (such as RandomForestClassifier)? Yes!
         if type(model) is str:
             # Add the default version of the model they are requesting
-            model = self.getDefaultVersionOf(model)
+            if model != '':
+                model_name = model
+                model = self.getDefaultVersionOf(model_name)
+                self.models_dict[model_name] = model
+            else:
+                if self.name:
+                    raise ValueError('Experiment object {} cannot add model default model: {}'.format( str(self.name), model))
+                else:
+                    raise ValueError('Experiment object cannot add model default model: {}'.format(model))
+        elif type(model) is Model:
+            model_name = model.getName()
+            if model_name:
+                self.models_dict[model_name] = model
+            elif type(name) == str and name != '':
+                self.models_dict[name] = model
+            else:
+                self.models_dict[self.getDefaultModelName()] = model
         elif type(model) is object:
-            print('model is an object!')
-            
             # TO-DO: What type of object is it? Scikit learn?
-            
+            print('the model is some kind of object!')
+
         # TO-DO: Find a way to generate automatic names for these models in a way that sounds smarter than model_1, model_2, ...
-        if type(name) is str:
+        elif type(name) is str:
             if name == '':
                 # Default name will be assigned
                 name = self.getDefaultModelName()
@@ -143,10 +160,24 @@ class Experiment:
         else:
             raise ValueError('Model name must be string: {}'.format(str(name)))
 
-        self.models_dict[name] = model
+    def run(self, X, y):
+        if len(X) == len(y):
+            for model_name in self.models_dict.keys():
+                model = self.models_dict[model_name]
+                model.run(X, y)
+            self.completed = True
+        else:
+            if self.name:
+                raise ValueError('Data and target provided to \'{}\' must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(self.name, str(len(X)), str(len(y))))
+            else:
+                raise ValueError('Provided data and target must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(str(len(X)), str(len(y))))
 
-    def run(self):
-        self.completed = True
+    def predict(self, X):
+        predicted_values = {}
+        for model_name in self.models_dict.keys():
+            model = self.models_dict[model_name]
+            predicted_values[model_name] = model.predict(X)
+        return predicted_values
 
     def setRandomState(self, rand_state):
         if type(rand_state) == int:
