@@ -2,6 +2,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from utils import Helper
 from model import Model
+from metric import MetricsManager, Metric
 
 class Experiments:
     '''
@@ -56,6 +57,8 @@ class Experiment:
     def __init__(self, name='', models=[], exp_type=None):
         self.helper = Helper()
         self.unnamed_model_count = 0
+
+        self.metrics_manager = MetricsManager()
     
         self.type_of_experiment = None
         if exp_type:
@@ -178,6 +181,26 @@ class Experiment:
             model = self.models_dict[model_name]
             predicted_values[model_name] = model.predict(X)
         return predicted_values
+
+    def eval(self, X, y, metrics=[]):
+        if len(X) == len(y):
+            for model_name in self.models_dict.keys():
+                model = self.models_dict[model_name]
+                metric_object = Metric(model_name)
+
+                model_metrics = model.eval(X, y, metrics)
+                for measure_name in model_metrics.keys():
+                    metric_object.addValue(measure_name, model_metrics[measure_name])
+                self.metrics_manager.addMetric(metric_object)
+
+            return self.metrics_manager.getMetrics()
+        else:
+            if self.name:
+                raise ValueError('Data and target provided to \'{}\' must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(self.name, str(len(X)), str(len(y))))
+            else:
+                raise ValueError('Provided data and target must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(str(len(X)), str(len(y))))
+        
+
 
     def setRandomState(self, rand_state):
         if type(rand_state) == int:

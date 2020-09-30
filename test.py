@@ -1,6 +1,7 @@
 from experiments import Experiments, Experiment
 from utils import Helper
 from model import Model
+from metric import Metric, MetricsManager
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
@@ -34,7 +35,7 @@ class TestExperiment(unittest.TestCase):
 
         models_dict = experiment.getModels()
 
-        print(models_dict)
+        #print(models_dict)
         self.assertTrue( 'rf' in models_dict )
 
     def test_setExperimentType(self):
@@ -90,6 +91,239 @@ class TestExperiment(unittest.TestCase):
                 'dt':
                     [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]}
         self.assertEqual( predictions, actual )
+
+    def test_eval(self):
+        iris = load_iris()
+        X_train, y_train = iris.data[:120], iris.target[:120]
+        X_test, y_test = iris.data[120:], iris.target[120:]
+
+        experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
+
+        experiment.run(X_train, y_train)
+        metrics = experiment.eval(X_test, y_test, metrics=['acc'])
+
+        rf_metric = Metric('rf')
+        rf_metric.addValue('acc', 0.7666666666666667)
+
+        dt_metric = Metric('dt')
+        dt_metric.addValue('acc', 0.8)
+
+        expected_metrics = [rf_metric, dt_metric]
+
+        self.assertEqual( metrics, expected_metrics )
+
+    def test_calcAcc(self):
+        model = Model()
+
+        pred = [0, 0, 1, 0, 0, 1]
+        act  = [1, 0, 1, 0, 1, 0]
+
+        accuracy_expected = 0.5
+        accuracy_calculated = model.calcAcc(act, pred)
+        self.assertEqual( accuracy_calculated, accuracy_expected )
+
+    def test_calcRec(self):
+        model = Model()
+
+        pred = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        act  = [1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+        recall_expected = 0.75
+        recall_calculated = model.calcRec(act, pred)
+        self.assertEqual( recall_calculated, recall_expected )
+
+    def test_calcPrec(self):
+        model = Model()
+
+        pred = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        act  = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+        precision_expected = 0.8235294117647058
+        precision_calculated = model.calcPrec(act, pred)
+        self.assertEqual( precision_calculated, precision_expected )
+
+class TestMetric(unittest.TestCase):
+    def test_init(self):
+        metric = Metric('random forest')
+        self.assertEqual( metric.getName(), 'random forest' )
+        self.assertEqual( metric.getValues(), {} )
+
+    def test_addValue(self):
+        metric = Metric('random forest')
+        metric.addValue('accuracy', 0.75)
+        self.assertEqual( metric.getValue('accuracy'), 0.75 )
+
+        metric.addValue('recall', 0.9)
+        metric.addValue('precision', 0.2)
+
+        self.assertEqual( metric.getValue('accuracy'), 0.75 )
+        self.assertEqual( metric.getValue('recall'), 0.9 )
+        self.assertEqual( metric.getValue('precision'), 0.2 )
+
+        metric.addValue('accuracy', 0.99)
+        metric.addValue('accuracy', 0.3)
+        metric.addValue('accuracy', 0.25672837482)
+
+        self.assertEqual( metric.getValue('accuracy'), 0.25672837482 )
+
+        try:
+            metric.addValue('accuracy', 'hello!')
+
+            # This should never run
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'str\'> and type(value) => <class \'str\'>')
+
+        try:
+            metric.addValue(['accuracy'], 0.9)
+
+            # This should never run
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'list\'> and type(value) => <class \'float\'>')
+
+    def test_getMetricWithMeasure(self):
+        metric = Metric('random forest')
+        metric.addValue('accuracy', 0.75)
+        metric.addValue('recall', 0.9)
+        metric.addValue('precision', 0.2)
+        metric.addValue('acc', 0.98)
+        metric.addValue('test_value', 500)
+
+        actual_result = metric.getMetricWithMeasure()
+        expected_result = {'accuracy': 0.75, 'recall': 0.9, 'precision': 0.2, 'acc': 0.98, 'test_value': 500} 
+        self.assertEqual( actual_result, expected_result )
+
+        actual_result = metric.getMetricWithMeasure('acc')
+        expected_result = {'acc': 0.98}
+        self.assertEqual( actual_result, expected_result )
+
+        actual_result = metric.getMetricWithMeasure(['recall', 'acc', 'test_value'])
+        expected_result = {'recall': 0.9, 'acc': 0.98, 'test_value': 500} 
+        self.assertEqual( actual_result, expected_result )
+
+        try:
+            actual_result = metric.getMetricWithMeasure( 480 )
+
+            # This should never be run
+            self.assertEqual( 0, 1 )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'Metric.getMetricWithMeasure must be given either a string of metric or array of strings of metrics desired.' )
+
+    def test_equals(self):
+        metric1 = Metric('some name')
+        metric1.addValue('acc', 0.98)
+        metric1.addValue('recall', 0.72)
+
+        metric2 = Metric('some other name')
+        metric2.addValue('acc', 0.98)
+        metric2.addValue('recall', 0.72)
+
+        self.assertEqual( metric1, metric2 )
+
+        metric1 = Metric('some name')
+        metric1.addValue('acc', 0.98)
+        metric1.addValue('recall', 0.72)
+
+        metric2 = Metric('some other name')
+        metric2.addValue('acc', 0.20)
+        metric2.addValue('recall', 0.5)
+
+        self.assertNotEqual( metric1, metric2 )
+        
+
+class TestMetricsManager(unittest.TestCase):
+    def test_init(self):
+        metrics_manager = MetricsManager()
+        self.assertListEqual( metrics_manager.metrics_list, [] )
+
+    def test_getMetrics(self):
+        metrics_manager = MetricsManager()
+
+        metric1 = Metric('metric1')
+        metric1.addValue('acc', 0.48)
+        metric1.addValue('recall', 0.3)
+        metric1.addValue('precision', 0.7)
+
+        metric2 = Metric('metric2')
+        metric2.addValue('acc', 0.98)
+        metric2.addValue('precision', 0.42)
+
+        metric3 = Metric('metric3')
+        metric3.addValue('recall', 0.34)
+        metric3.addValue('precision', 0)
+
+        metric4 = Metric('metric4')
+        metric4.addValue('acc', 0.8)
+        metric4.addValue('recall', 0.35)
+
+        metric5 = Metric('metric5')
+        metric5.addValue('acc', 0.14)
+        metric5.addValue('recall', 0.03)
+        metric5.addValue('precision', 0.71)
+
+        metric6 = Metric('metric6')
+        metric6.addValue('acc', 0.92)
+        metric6.addValue('recall', 1.0)
+        metric6.addValue('precision', 0.63)
+
+        metrics_manager.addMetric(metric1)
+        metrics_manager.addMetric(metric2)
+        metrics_manager.addMetric(metric3)
+        metrics_manager.addMetric(metric4)
+        metrics_manager.addMetric(metric5)
+        metrics_manager.addMetric(metric6)
+
+        actual_result_metrics = metrics_manager.getMetrics()
+        expected_result_metrics = [metric1, metric2, metric3, metric4, metric5, metric6]
+        self.assertListEqual( actual_result_metrics, expected_result_metrics )
+
+        
+        metrics_manager = MetricsManager()
+
+        metric1 = Metric('metric1')
+        metric1.addValue('acc', 0.48)
+        metric1.addValue('recall', 0.3)
+        metric1.addValue('precision', 0.7)
+
+        metric2 = Metric('metric2')
+        metric2.addValue('acc', 0.98)
+        metric2.addValue('precision', 0.42)
+
+        metric3 = Metric('metric3')
+        metric3.addValue('recall', 0.34)
+        metric3.addValue('precision', 0)
+
+        metric4 = Metric('metric4')
+        metric4.addValue('acc', 0.8)
+        metric4.addValue('recall', 0.35)
+
+        metric5 = Metric('metric5')
+        metric5.addValue('acc', 0.14)
+        metric5.addValue('recall', 0.03)
+        metric5.addValue('precision', 0.71)
+
+        metric6 = Metric('metric6')
+        metric6.addValue('acc', 0.92)
+        metric6.addValue('recall', 1.0)
+        metric6.addValue('precision', 0.63)
+
+        metrics_manager.addMetric(metric1)
+        metrics_manager.addMetric(metric2)
+        metrics_manager.addMetric(metric3)
+        metrics_manager.addMetric(metric4)
+        metrics_manager.addMetric(metric5)
+        metrics_manager.addMetric(metric6)
+
+        # Metric 3 will be different!
+        metric3 = Metric('metric3')
+        metric3.addValue('recall', 0.68)
+        metric3.addValue('precision', 0.74)
+
+        actual_result_metrics = metrics_manager.getMetrics()
+        expected_result_metrics = [metric1, metric2, metric3, metric4, metric5, metric6]
+        self.assertNotEqual( actual_result_metrics, expected_result_metrics )
+
 
 class TestExperiments(unittest.TestCase):
     def test_init(self):
@@ -218,6 +452,22 @@ class TestModel(unittest.TestCase):
             self.assertEqual( 0, 1 )
         except ValueError as ve:
             self.assertEqual( str(ve), 'Model dt1 cannot be trained when data and target are different lengths:\n\tlen of data: 120\n\tlen of target: 119' )
+
+    def test_eval(self):
+        iris = load_iris()
+        X_train, y_train = iris.data[:120], iris.target[:120]
+        X_test, y_test = iris.data[120:], iris.target[120:]
+
+        rf = Model('rf', RandomForestClassifier, {'random_state':0})
+        rf.run(X_train, y_train)
+        metrics = rf.eval(X_test, y_test, metrics=['acc'])
+
+        rf_metric = Metric('rf')
+        rf_metric.addValue('acc', 0.7666666666666667)
+
+        expected_metrics = rf_metric.getValues()
+
+        self.assertEqual( metrics, expected_metrics )
 
 if __name__ == '__main__':
     unittest.main()
