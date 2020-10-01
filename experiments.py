@@ -1,4 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import StratifiedKFold
+
+import numpy as np
 
 from utils import Helper
 from model import Model
@@ -39,7 +42,7 @@ class Experiments:
     def runAllExperiments(self):
         if len(self.experiment_dict.keys()) > 0:
             for experiment in self.experiment_dict.keys():
-                experiment.run()
+                experiment.train()
         else:
             raise ValueError('Experiments object has no models to run!')
 
@@ -57,6 +60,7 @@ class Experiment:
     def __init__(self, name='', models=[], exp_type=None):
         self.helper = Helper()
         self.unnamed_model_count = 0
+        self.random_state = 0
 
         self.metrics_manager = MetricsManager()
     
@@ -163,11 +167,38 @@ class Experiment:
         else:
             raise ValueError('Model name must be string: {}'.format(str(name)))
 
-    def run(self, X, y):
+    def train(self, X, y, cv=False, n_folds=0, shuffle=False, metrics=[]):
         if len(X) == len(y):
-            for model_name in self.models_dict.keys():
-                model = self.models_dict[model_name]
-                model.run(X, y)
+            if cv:
+                # Cross validation
+                sss = None
+                if shuffle:
+                    sss = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=self.random_state)
+                else:
+                    sss = StratifiedKFold(n_splits=n_folds)
+                fold_num = 0
+                for train_idx, val_idx in sss.split(X, y):
+                    fold_num += 1
+
+                    # Organize the data
+                    X_train, y_train = [], []
+                    X_val, y_val = [], []
+                    if type(X) == np.ndarray and type(y) == np.ndarray:
+                        X_train, y_train = X[train_idx], y[train_idx]
+                        X_val, y_val = X[val_idx], y[val_idx]
+                    # TO-DO: Implement for pd.DataFrame and pd.Series objects
+
+                    for model_name in self.models_dict.keys():
+                        model = self.models_dict[model_name]
+                        model.run(X_train, y_train)
+                    
+                    # Evaluate the performance of this model and keep track of it
+                    self.eval(X_val, y_val, metrics=metrics, fold_num=fold_num)
+
+            else:
+                for model_name in self.models_dict.keys():
+                    model = self.models_dict[model_name]
+                    model.run(X, y)
             self.completed = True
         else:
             if self.name:
@@ -182,29 +213,46 @@ class Experiment:
             predicted_values[model_name] = model.predict(X)
         return predicted_values
 
-    def eval(self, X, y, metrics=[]):
+    def eval(self, X, y, metrics=[], fold_num=None):
         if len(X) == len(y):
+            # If we aren't running cross validation, then clear out the metrics
+            if not fold_num:
+                self.metrics_manager.clearMetrics()
             for model_name in self.models_dict.keys():
                 model = self.models_dict[model_name]
-                metric_object = Metric(model_name)
+                if fold_num and type(fold_num) == int:
+                    metric_object = Metric(model_name, fold=fold_num)
+                else:
+                    metric_object = Metric(model_name)
 
                 model_metrics = model.eval(X, y, metrics)
                 for measure_name in model_metrics.keys():
                     metric_object.addValue(measure_name, model_metrics[measure_name])
                 self.metrics_manager.addMetric(metric_object)
 
-            return self.metrics_manager.getMetrics()
+            if not fold_num:
+                return self.metrics_manager.getMetrics()
         else:
             if self.name:
                 raise ValueError('Data and target provided to \'{}\' must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(self.name, str(len(X)), str(len(y))))
             else:
                 raise ValueError('Provided data and target must be same length:\n\tlen of data: {}\n\tlen of target: {}'.format(str(len(X)), str(len(y))))
         
+    def getMetrics(self):
+        return self.metrics_manager.getMetrics()
 
+    def summarizeMetrics(self):
+        return self.metrics_manager.printMeasures()
 
     def setRandomState(self, rand_state):
         if type(rand_state) == int:
             self.random_state = rand_state
+            self.helper.setRandomState(rand_state)
+            
+            for model_name in self.models_dict.keys():
+                model = self.models_dict[model_name]
+                if model.hasConstructorArg('random_state'):
+                    model.setConstructorArg('random_state', rand_state)
         else:
             raise ValueError('random state must be integer: {}'.format(rand_state))
 

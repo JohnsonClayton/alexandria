@@ -1,4 +1,6 @@
-import sklearn as sk
+# Models
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 class Helper:
     def __init__(self):
@@ -8,16 +10,16 @@ class Helper:
     def initializeDefaultModels(self):
         self.default_model_objs = {
                 'rf:regressor': [
-                        sk.ensemble.RandomForestRegressor,
+                        RandomForestRegressor,
                         {'random_state':self.random_state}],
                 'rf:classifier': [
-                        sk.ensemble.RandomForestClassifier,
+                        RandomForestClassifier,
                         {'random_state':self.random_state}],
                 'dt:regressor': [
-                        sk.tree.DecisionTreeRegressor,
+                        DecisionTreeRegressor,
                         {'random_state':self.random_state}],
                 'dt:classifier': [
-                        sk.tree.DecisionTreeClassifier,
+                        DecisionTreeClassifier,
                         {'random_state':self.random_state}]
         }
 
