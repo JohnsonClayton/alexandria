@@ -55,6 +55,17 @@ class Helper:
         else:
             raise ValueError('No default model found for {}'.format(str(model)))
 
+    def setDefaultArgs(self, model, args):
+        if type(model) == str and model in self.default_model_objs:
+            if type(args) == dict:
+                if len(self.default_model_objs[model]) < 2:
+                    raise ValueError('Illegal state! default_model_objs[{}] cannot have fewer than 2 items!'.format(model))
+                self.default_model_objs[model][1] = args
+            else:
+                raise ValueError('Arguments must be in dictionary format, not {} type!'.format( str(type(args)) ))
+        else:
+            raise ValueError('Default model cannot be found: {}'.format(str(model)))
+
     def setRandomState(self, rand_state):
         if type(rand_state) == int:
             self.random_state = rand_state

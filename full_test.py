@@ -447,6 +447,52 @@ class TestHelper(unittest.TestCase):
 		
 		model = model(**args)
 		self.assertEqual( type(model), DecisionTreeRegressor )
+	
+	def test_setDefaultArgs(self):
+		helper = Helper()
+
+		model_name = 'rf:classifier'
+		default_arguments = {'max_depth': 4, 'random_state': 0}
+
+		helper.setDefaultArgs(model_name, default_arguments)
+
+		self.assertEqual( helper.getDefaultArgs(model_name), default_arguments )
+
+		try:
+			model_name = 'jefferey'
+			default_arguments = {'num_of_kids': 3, 
+				'close_with_kids': False, 
+				'kids_call': False,
+				'happy_marriage': False}
+
+			helper.setDefaultArgs(model_name, default_arguments)
+
+			# This should never run
+			self.assertTrue( False )
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Default model cannot be found: jefferey')
+
+		try:
+			model_name = 'rf:classifier'
+			default_arguments = list([5, 10, 15, 20])
+
+			helper.setDefaultArgs(model_name, default_arguments)
+
+			# This should never run
+			self.assertTrue( False )
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Arguments must be in dictionary format, not <class \'list\'> type!')
+
+
+		# While there will be an error thrown if the model cannot be found, there is no
+		#  way to check if the arguments are valid right now, so we will error later if 
+		#  the model cannot be built
+
+		model_name = 'rf:classifier'
+		default_arguments = {'whatever_sort_of_args': True}
+		helper.setDefaultArgs(model_name, default_arguments)
+		self.assertEqual( helper.getDefaultArgs(model_name), default_arguments )
+		
 
 	def test_setRandomState(self):
 		helper = Helper()
