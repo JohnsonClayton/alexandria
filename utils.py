@@ -1,6 +1,13 @@
 # Models
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
+
 
 class Helper:
     def __init__(self):
@@ -20,7 +27,20 @@ class Helper:
                         {'random_state':self.random_state}],
                 'dt:classifier': [
                         DecisionTreeClassifier,
-                        {'random_state':self.random_state}]
+                        {'random_state':self.random_state}],
+                'ab:classifier': [
+                        AdaBoostClassifier,
+                        {'random_state':self.random_state}],
+                'ab:regressor': [
+                        AdaBoostRegressor,
+                        {'random_state':self.random_state}],
+                'knn:classifier': [
+                        KNeighborsClassifier,
+                        {}],
+                'knn:regressor': [
+                        KNeighborsRegressor,
+                        {}]
+                
         }
 
     def getDefaultModel(self, model):
@@ -41,3 +61,8 @@ class Helper:
             self.initializeDefaultModels()
         else:
             raise ValueError('Random state must be an integer: {}'.format(str(rand_state)))
+
+    def getBuiltModel(self, model_name):
+        model = self.getDefaultModel(model_name)
+        args = self.getDefaultArgs(model_name)
+        return model(**args)

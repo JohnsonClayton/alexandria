@@ -3,11 +3,16 @@ from utils import Helper
 from model import Model
 from metric import Metric, MetricsManager
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
-from abc import ABCMeta
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 
-from sklearn.datasets import load_iris, make_classification
+from sklearn.datasets import load_iris, load_boston, make_classification
 
 import sys
 
@@ -430,14 +435,7 @@ class TestHelper(unittest.TestCase):
 		model = model(**args)
 		self.assertEqual( type(model), RandomForestClassifier )
 
-		try:
-			helper.setRandomState( 'cheeseburger' )
-
-			# This should never run!
-			self.assertEqual(0, 1)
-		except ValueError as ve:
-			self.assertEqual( str(ve), 'Random state must be an integer: cheeseburger' )
-
+		
 		helper.setRandomState(1)
 
 		model_name = 'dt:regressor'
@@ -449,6 +447,282 @@ class TestHelper(unittest.TestCase):
 		
 		model = model(**args)
 		self.assertEqual( type(model), DecisionTreeRegressor )
+
+	def test_setRandomState(self):
+		helper = Helper()
+
+		self.assertEqual( helper.random_state, 0 )
+
+		try:
+			helper.setRandomState( 'cheeseburger' )
+
+			# This should never run!
+			self.assertEqual(0, 1)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Random state must be an integer: cheeseburger' )
+
+		helper.setRandomState(101)
+
+		self.assertEqual( helper.random_state, 101 )
+
+	def test_getBuiltModel(self):
+		helper = Helper()
+
+		model_name = 'rf:classifier'
+		actual = helper.getBuiltModel(model_name)
+		expected = RandomForestClassifier(random_state=0)
+		self.assertEqual( type(actual), type(expected) )
+
+		try:
+			model_name = 'jonathan'
+			model = helper.getBuiltModel(model_name)
+
+			# This should never run
+			self.assertTrue( False )
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'No default model found for jonathan')
+
+
+	def test_RandomForestClassifier(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'rf:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = RandomForestClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_RandomForestRegressor(self):
+		helper = Helper()
+
+		# Load up data
+		X, y = load_boston(return_X_y=True)
+		X_train, y_train, X_test, y_test = X[:405], y[:405], X[405:], y[405:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'rf:regressor'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = RandomForestRegressor(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_DecisionTreeClassifier(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'dt:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = DecisionTreeClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_DecisionTreeRegressor(self):
+		helper = Helper()
+
+		# Load up data
+		X, y = load_boston(return_X_y=True)
+		X_train, y_train, X_test, y_test = X[:405], y[:405], X[405:], y[405:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'dt:regressor'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = DecisionTreeRegressor(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_KNeighorsClassifier(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'knn:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = KNeighborsClassifier()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_KNeighborsRegressor(self):
+		helper = Helper()
+
+		# Load up data
+		X, y = load_boston(return_X_y=True)
+		X_train, y_train, X_test, y_test = X[:405], y[:405], X[405:], y[405:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'knn:regressor'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = KNeighborsRegressor()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_AdaBoostClassifier(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'ab:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = AdaBoostClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_AdaBoostRegressor(self):
+		helper = Helper()
+
+		# Load up data
+		X, y = load_boston(return_X_y=True)
+		X_train, y_train, X_test, y_test = X[:405], y[:405], X[405:], y[405:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'ab:regressor'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = AdaBoostRegressor(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
 
 class TestModel(unittest.TestCase):
 	def test_init(self):
