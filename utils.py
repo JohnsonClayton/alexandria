@@ -1,12 +1,19 @@
 # Models
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import AdaBoostRegressor
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import DecisionTreeRegressor
+
 
 
 class Helper:
@@ -39,13 +46,35 @@ class Helper:
                         {}],
                 'knn:regressor': [
                         KNeighborsRegressor,
-                        {}]
+                        {}],
+                'lda': [
+                        LinearDiscriminantAnalysis,
+                        {}],
+                'lr': [
+                        LogisticRegression,
+                        {'random_state':self.random_state}],
+                'nb': [
+                        GaussianNB,
+                        {}],
+                'svm:classifier': [
+                        SVC,
+                        {'random_state':self.random_state}],
+                'mlp:classifier': [
+                        MLPClassifier,
+                        {'random_state':self.random_state}],
+                'mlp:regressor': [
+                        MLPRegressor,
+                        {'random_state':self.random_state}]
                 
         }
 
     def getDefaultModel(self, model):
-        if type(model) == str and model in self.default_model_objs:
-            return self.default_model_objs[model][0]
+        if type(model) == str:
+            model = model.split(':')
+            for i in range(len(model)):
+                model_name = ':'.join( model[:i+1] )
+                if model_name in self.default_model_objs:
+                    return self.default_model_objs[model_name][0]
         else:
             raise ValueError('No default model found for {}'.format(str(model)))
 

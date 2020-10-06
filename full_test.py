@@ -3,12 +3,18 @@ from utils import Helper
 from model import Model
 from metric import Metric, MetricsManager
 
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import AdaBoostRegressor
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import DecisionTreeRegressor
 
@@ -163,7 +169,7 @@ class TestExperiment(unittest.TestCase):
 		dt_metric.addValue('prec_std', 0.036244412085277455)
 
 		expected_metrics = {'rf': rf_metric, 'dt': dt_metric}
-		metrics = experiment.summarizeMetrics()
+		metrics = experiment.getSummarizedMetrics()
 
 		self.assertEqual( metrics, expected_metrics )
 
@@ -739,6 +745,185 @@ class TestHelper(unittest.TestCase):
 		# Make sure that the accuracy reported from both models is the same
 		self.assertEqual( actual_accuracy, expected_accuracy )
 
+	def test_LinearDiscriminantAnalysis(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'lda'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = LinearDiscriminantAnalysis()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_LogisticRegression(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'lr'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = LogisticRegression(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_GaussianNaiveBayes(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'nb'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = GaussianNB()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_SupportVectorMachine(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'svm:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = SVC(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_MLPClassifier(self):
+		helper = Helper()
+
+		# Load up data
+		iris = load_iris()
+		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'mlp:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = MLPClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+	def test_MLPRegressor(self):
+		helper = Helper()
+
+		# Load up data
+		X, y = load_boston(return_X_y=True)
+		X_train, y_train, X_test, y_test = X[:405], y[:405], X[405:], y[405:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'mlp:regressor'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = MLPRegressor(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
 
 class TestModel(unittest.TestCase):
 	def test_init(self):
