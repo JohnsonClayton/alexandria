@@ -1,5 +1,5 @@
 # alexandria
-This is a high-level machine learning framework that (will) allow for the users to easily run multiple types of machine learning experiments at the drop of a hat. An example for the desired API is below:
+This is a high-level machine learning framework that allows for the users to easily run multiple types of machine learning experiments at the drop of a hat. An example for the API is below:
 
 ```python
 # main.py
