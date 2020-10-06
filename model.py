@@ -48,7 +48,7 @@ class Model:
 			else:
 				raise ValueError('Constructor arguments must be dictionary type: {}'.format(str(constr_args)))
 		else:
-			self.constructor_args = None
+			self.constructor_args = {}
 
 	def getName(self):
 		return self.name

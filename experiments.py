@@ -3,6 +3,8 @@ from sklearn.model_selection import StratifiedKFold
 
 import numpy as np
 
+from tabulate import tabulate
+
 from utils import Helper
 from model import Model
 from metric import MetricsManager, Metric
@@ -170,31 +172,33 @@ class Experiment:
     def train(self, X, y, cv=False, n_folds=0, shuffle=False, metrics=[]):
         if len(X) == len(y):
             if cv:
-                # Cross validation
-                sss = None
-                if shuffle:
-                    sss = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=self.random_state)
+                if n_folds > 0:
+                    # Cross validation
+                    sss = None
+                    if shuffle:
+                        sss = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=self.random_state)
+                    else:
+                        sss = StratifiedKFold(n_splits=n_folds)
+                    fold_num = 0
+                    for train_idx, val_idx in sss.split(X, y):
+                        fold_num += 1
+
+                        # Organize the data
+                        X_train, y_train = [], []
+                        X_val, y_val = [], []
+                        if type(X) == np.ndarray and type(y) == np.ndarray:
+                            X_train, y_train = X[train_idx], y[train_idx]
+                            X_val, y_val = X[val_idx], y[val_idx]
+                        # TO-DO: Implement for pd.DataFrame and pd.Series objects
+
+                        for model_name in self.models_dict.keys():
+                            model = self.models_dict[model_name]
+                            model.run(X_train, y_train)
+                        
+                        # Evaluate the performance of this model and keep track of it
+                        self.eval(X_val, y_val, metrics=metrics, fold_num=fold_num)
                 else:
-                    sss = StratifiedKFold(n_splits=n_folds)
-                fold_num = 0
-                for train_idx, val_idx in sss.split(X, y):
-                    fold_num += 1
-
-                    # Organize the data
-                    X_train, y_train = [], []
-                    X_val, y_val = [], []
-                    if type(X) == np.ndarray and type(y) == np.ndarray:
-                        X_train, y_train = X[train_idx], y[train_idx]
-                        X_val, y_val = X[val_idx], y[val_idx]
-                    # TO-DO: Implement for pd.DataFrame and pd.Series objects
-
-                    for model_name in self.models_dict.keys():
-                        model = self.models_dict[model_name]
-                        model.run(X_train, y_train)
-                    
-                    # Evaluate the performance of this model and keep track of it
-                    self.eval(X_val, y_val, metrics=metrics, fold_num=fold_num)
-
+                    raise ValueError('Number of folds in cross validation (n_folds) must be larger than zero!')
             else:
                 for model_name in self.models_dict.keys():
                     model = self.models_dict[model_name]
@@ -242,7 +246,21 @@ class Experiment:
         return self.metrics_manager.getMetrics()
 
     def summarizeMetrics(self):
-        return self.metrics_manager.printMeasures()
+        metrics = self.metrics_manager.printMeasures()
+        metrics_list_format = []
+
+        headers = ['model']
+
+        for model_name in metrics.keys():
+            new_row = [model_name]
+            for measure in metrics[model_name].getMeasures():
+                if measure not in headers:
+                    headers.append(measure)
+                new_row.append(metrics[model_name].getValue(measure))
+            metrics_list_format.append(new_row)
+
+        print( tabulate(metrics_list_format, headers=headers) )
+            
 
     def setRandomState(self, rand_state):
         if type(rand_state) == int:
