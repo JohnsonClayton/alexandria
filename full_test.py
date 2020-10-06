@@ -167,36 +167,6 @@ class TestExperiment(unittest.TestCase):
 
 		self.assertEqual( metrics, expected_metrics )
 
-	def test_calcAcc(self):
-		model = Model()
-
-		pred = [0, 0, 1, 0, 0, 1]
-		act  = [1, 0, 1, 0, 1, 0]
-
-		accuracy_expected = 0.5
-		accuracy_calculated = model.calcAcc(act, pred)
-		self.assertEqual( accuracy_calculated, accuracy_expected )
-
-	def test_calcRec(self):
-		model = Model()
-
-		pred = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		act  = [1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
-
-		recall_expected = 0.75
-		recall_calculated = model.calcRec(act, pred)
-		self.assertEqual( recall_calculated, recall_expected )
-
-	def test_calcPrec(self):
-		model = Model()
-
-		pred = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		act  = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
-
-		precision_expected = 0.8235294117647058
-		precision_calculated = model.calcPrec(act, pred)
-		self.assertEqual( precision_calculated, precision_expected )
-
 class TestMetric(unittest.TestCase):
 	def test_init(self):
 		metric = Metric('random forest')
@@ -817,6 +787,91 @@ class TestModel(unittest.TestCase):
 			self.assertEqual( 0, 1 )
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Model \'best name ever!\' cannot set constructor as non-callable value: the lazy brown dog jumped over the fox')
+
+	def test_calcAcc(self):
+		model = Model()
+
+		pred = [0, 0, 1, 0, 0, 1]
+		act  = [1, 0, 1, 0, 1, 0]
+
+		accuracy_expected = 0.5
+		accuracy_calculated = model.calcAcc(act, pred)
+		self.assertEqual( accuracy_calculated, accuracy_expected )
+
+	def test_calcRec(self):
+		model = Model()
+
+		pred = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+		act  = [1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+		recall_expected = 0.75
+		recall_calculated = model.calcRec(act, pred)
+		self.assertEqual( recall_calculated, recall_expected )
+
+	def test_calcPrec(self):
+		model = Model()
+
+		pred = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+		act  = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+		precision_expected = 0.8235294117647058
+		precision_calculated = model.calcPrec(act, pred)
+		self.assertEqual( precision_calculated, precision_expected )
+
+	def test_predict(self):
+		rfmodel = Model('rf', RandomForestClassifier, {'random_state':0})
+		dtmodel = Model('dt', DecisionTreeClassifier, {'random_state':0})
+		iris = load_iris()
+
+		rfmodel.run(iris.data[:120], iris.target[:120])
+		dtmodel.run(iris.data[:120], iris.target[:120])
+
+		rfpredictions = rfmodel.predict(iris.data[120:])
+		dtpredictions = dtmodel.predict(iris.data[120:])
+
+		rfactual = [2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2] 
+		dtactual = [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+		
+		self.assertEqual( rfpredictions, rfactual )
+		self.assertEqual( dtpredictions, dtactual )
+
+	def test_calcMetric(self):
+		model = Model('m1')
+
+		pred = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+		act  = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+		exp_acc = 0.75
+		exp_rec = 0.75
+		exp_prec = 0.8235294117647058
+
+		actual_acc = model.calcMetric(act, pred, 'acc')
+		self.assertEqual( actual_acc, exp_acc )
+
+		actual_rec = model.calcMetric(act, pred, 'rec')
+		self.assertEqual( actual_rec, exp_rec )
+
+		actual_prec = model.calcMetric(act, pred, 'prec')
+		self.assertEqual( actual_prec, exp_prec )
+
+
+	def test_calcMetrics(self):
+		model = Model('m1')
+
+		pred = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+		act  = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+
+		exp_acc = 0.75
+		exp_rec = 0.75
+		exp_prec = 0.8235294117647058
+		expected_metrics = {'acc': exp_acc,
+							'rec': exp_rec,
+							'prec': exp_prec}
+
+		actual_metrics = model.calcMetrics(act, pred, ['acc', 'rec', 'prec'])
+
+		self.assertEqual( actual_metrics, expected_metrics )
+
 
 	def test_run(self):
 		model = Model(name='rf1', constr=RandomForestClassifier, constr_args={'max_depth': 2, 'random_state': 0})
