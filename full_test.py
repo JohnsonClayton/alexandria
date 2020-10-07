@@ -24,6 +24,9 @@ import sys
 
 import unittest
 
+def fail(who):
+	who.assertTrue( False )
+
 class TestExperiment(unittest.TestCase):
 	def test_init(self):
 		experiment = Experiment()
@@ -41,8 +44,6 @@ class TestExperiment(unittest.TestCase):
 		models = experiment.getModels()
 		self.assertEqual( models['rf'].getConstructorArgs()['random_state'], 1 )
 		self.assertEqual( models['dt'].getConstructorArgs()['random_state'], 1 )
-
-
 
 	def test_isValidExperimentType(self):
 		experiment = Experiment()
@@ -69,8 +70,7 @@ class TestExperiment(unittest.TestCase):
 		try:
 			experiment.setExperimentType(experiment_type)
 
-			# This should never run!
-			self.assertEqual(0, 1)
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Experiment must be \'regression\' or \'classification\', cannot be bloogus!' )
 
@@ -79,7 +79,7 @@ class TestExperiment(unittest.TestCase):
 	   
 		self.assertEqual( experiment.getExperimentType(), experiment_type )
 
-	def test_run(self):
+	def test_train(self):
 		experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
 		iris = load_iris()
 
@@ -88,8 +88,7 @@ class TestExperiment(unittest.TestCase):
 		try:
 			experiment.train(iris.data[:120], iris.target[:12])
 
-			# This should never be executed!
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Data and target provided to \'exp1\' must be same length:\n\tlen of data: 120\n\tlen of target: 12' )
 
@@ -99,8 +98,7 @@ class TestExperiment(unittest.TestCase):
 		try:
 			experiment.train(iris.data[:47], iris.target)
 
-			# This should never be executed!
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Data and target provided to \'unnamed_experiment\' must be same length:\n\tlen of data: 47\n\tlen of target: 150' )
 
@@ -173,6 +171,21 @@ class TestExperiment(unittest.TestCase):
 
 		self.assertEqual( metrics, expected_metrics )
 
+		try:
+			experiment.train(X, y, cv=True, n_folds=0, shuffle=True, metrics=['acc', 'rec', 'prec'])
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Number of folds in cross validation (n_folds) must be larger than zero!' )
+
+		try:
+			experiment.train(X, y, cv=True, n_folds=-1, shuffle=True, metrics=['acc', 'rec', 'prec'])
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Number of folds in cross validation (n_folds) must be larger than zero!' )
+
+
 class TestMetric(unittest.TestCase):
 	def test_init(self):
 		metric = Metric('random forest')
@@ -200,16 +213,14 @@ class TestMetric(unittest.TestCase):
 		try:
 			metric.addValue('accuracy', 'hello!')
 
-			# This should never run
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'str\'> and type(value) => <class \'str\'>')
 
 		try:
 			metric.addValue(['accuracy'], 0.9)
 
-			# This should never run
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'list\'> and type(value) => <class \'float\'>')
 
@@ -236,8 +247,7 @@ class TestMetric(unittest.TestCase):
 		try:
 			actual_result = metric.getMetricWithMeasure( 480 )
 
-			# This should never be run
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Metric.getMetricWithMeasure must be given either a string of metric or array of strings of metrics desired.' )
 
@@ -365,25 +375,21 @@ class TestExperiments(unittest.TestCase):
 		try:
 			experiments.runAllExperiments()
 
-			# This should never be reached in the case of a successful execution
-			self.assertEqual( 0, 1)
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Experiments object has no models to run!')
 
 		try:
 			experiments.addExperiment('random forest')
 
-			# This should never be reached in the case of a successful execution
-			self.assertEqual( 0, 1)
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Object must be Experiment object: random forest')
 
 		try:
 			experiments.addExperiment( Experiment(1) )
 
-			
-			# This should never be reached in the case of a successful execution
-			self.assertEqual( 0, 1)
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Experiment name attribute must be string: 1' )
 		self.assertEqual( experiments.getNumOfExperiments(), 0 )
@@ -443,8 +449,7 @@ class TestHelper(unittest.TestCase):
 
 			helper.setDefaultArgs(model_name, default_arguments)
 
-			# This should never run
-			self.assertTrue( False )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Default model cannot be found: jefferey')
 
@@ -454,8 +459,7 @@ class TestHelper(unittest.TestCase):
 
 			helper.setDefaultArgs(model_name, default_arguments)
 
-			# This should never run
-			self.assertTrue( False )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Arguments must be in dictionary format, not <class \'list\'> type!')
 
@@ -499,8 +503,7 @@ class TestHelper(unittest.TestCase):
 			model_name = 'jonathan'
 			model = helper.getBuiltModel(model_name)
 
-			# This should never run
-			self.assertTrue( False )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'No default model found for jonathan')
 
@@ -968,8 +971,7 @@ class TestModel(unittest.TestCase):
 		try:
 			model.setConstructor('the lazy brown dog jumped over the fox')
 
-			# This should never run!
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Model \'best name ever!\' cannot set constructor as non-callable value: the lazy brown dog jumped over the fox')
 
@@ -1076,8 +1078,7 @@ class TestModel(unittest.TestCase):
 		try:
 			model.run( iris.data[:120], iris.target[:119] )
 
-			# This should never execute!
-			self.assertEqual( 0, 1 )
+			fail(self)
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Model dt1 cannot be trained when data and target are different lengths:\n\tlen of data: 120\n\tlen of target: 119' )
 
