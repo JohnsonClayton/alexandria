@@ -21,6 +21,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_iris, load_boston, make_classification
 
 import sys
+import numpy as np
+import pandas as pd
 
 import unittest
 
@@ -80,6 +82,8 @@ class TestExperiment(unittest.TestCase):
 		self.assertEqual( experiment.getExperimentType(), experiment_type )
 
 	def test_train(self):
+
+		# Test with input data type: sklearn DataBunch
 		experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
 		iris = load_iris()
 
@@ -102,12 +106,54 @@ class TestExperiment(unittest.TestCase):
 		except ValueError as ve:
 			self.assertEqual( str(ve), 'Data and target provided to \'unnamed_experiment\' must be same length:\n\tlen of data: 47\n\tlen of target: 150' )
 
+		# Test with input data type: pandas DataFrame
+		experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+
+		experiment.train(X, y)
+
+		try:
+			experiment.train(X, y.sample(120))
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Data and target provided to \'exp1\' must be same length:\n\tlen of data: 150\n\tlen of target: 120' )
+
+		experiment = Experiment(models=['rf', 'dt'], exp_type='classification')
+		experiment.train(X.sample(120), y.sample(120))
+
+		try:
+			experiment.train(X.sample(120), y)
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Data and target provided to \'unnamed_experiment\' must be same length:\n\tlen of data: 120\n\tlen of target: 150' )
+
+
 	def test_predict(self):
+		# Test with dataset type: sklearn DataBunch
 		experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
 		iris = load_iris()
 
 		experiment.train(iris.data[:120], iris.target[:120])
 		predictions = experiment.predict(iris.data[120:])
+		actual = {
+				'rf':
+					[2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 
+				'dt':
+					[2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]}
+		self.assertEqual( predictions, actual )
+
+		# Test with dataset type: pandas DataFrame
+		experiment = Experiment('exp1', models=['rf', 'dt'], exp_type='classification')
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+
+		experiment.train(X.iloc[:120], y.iloc[:120])
+		predictions = experiment.predict(X.iloc[120:])
 		actual = {
 				'rf':
 					[2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 
@@ -510,10 +556,41 @@ class TestHelper(unittest.TestCase):
 
 	def test_RandomForestClassifier(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default RandomForestClassifier model
+		model_name = 'rf:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = RandomForestClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
 
 		# Bring in the default RandomForestClassifier model
 		model_name = 'rf:classifier'
@@ -570,12 +647,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_DecisionTreeClassifier(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default DecisionTreeClassifier model
+		model_name = 'dt:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = DecisionTreeClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default DecisionTreeClassifier model
 		model_name = 'dt:classifier'
 		actual_model = helper.getBuiltModel(model_name)
 
@@ -630,12 +738,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_KNeighorsClassifier(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default KNeighborsClassifier model
+		model_name = 'knn:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = KNeighborsClassifier()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default KNeighborsClassifier model
 		model_name = 'knn:classifier'
 		actual_model = helper.getBuiltModel(model_name)
 
@@ -690,12 +829,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_AdaBoostClassifier(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default AdaBoostClassifier model
+		model_name = 'ab:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = AdaBoostClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default AdaBoostClassifier model
 		model_name = 'ab:classifier'
 		actual_model = helper.getBuiltModel(model_name)
 
@@ -750,12 +920,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_LinearDiscriminantAnalysis(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default LinearDiscriminantAnalysis model
+		model_name = 'lda'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = LinearDiscriminantAnalysis()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default LinearDiscriminantAnalysis model
 		model_name = 'lda'
 		actual_model = helper.getBuiltModel(model_name)
 
@@ -810,10 +1011,41 @@ class TestHelper(unittest.TestCase):
 
 	def test_GaussianNaiveBayes(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
+
+		# Bring in the default GaussianNaiveBayes model
+		model_name = 'nb'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = GaussianNB()
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
 
 		# Bring in the default RandomForestClassifier model
 		model_name = 'nb'
@@ -840,12 +1072,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_SupportVectorMachine(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default SupportVectorMachine model
+		model_name = 'svm:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = SVC(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default SupportVectorMachine model
 		model_name = 'svm:classifier'
 		actual_model = helper.getBuiltModel(model_name)
 
@@ -870,12 +1133,43 @@ class TestHelper(unittest.TestCase):
 
 	def test_MLPClassifier(self):
 		helper = Helper()
-
+		# Test with dataset type: sklearn DataBunch
 		# Load up data
 		iris = load_iris()
 		X_train, y_train, X_test, y_test = iris.data[:120], iris.target[:120], iris.data[120:], iris.target[120:]
 
-		# Bring in the default RandomForestClassifier model
+		# Bring in the default MLPClassifier model
+		model_name = 'mlp:classifier'
+		actual_model = helper.getBuiltModel(model_name)
+
+		# Explicity create the model we expect to get from getBuiltModel call
+		expected_model = MLPClassifier(random_state=0)
+
+		# Make sure the models are the same type before continuing
+		self.assertEqual( type(actual_model), type(expected_model) )
+
+		# Train this default model on the iris dataset
+		actual_model.fit(X_train, y_train)
+		
+		# Get default model accuracy on testing set
+		actual_accuracy = actual_model.score(X_test, y_test)
+
+		# Complete the same process, however we make the model explicitly
+		expected_model.fit(X_train, y_train)
+		expected_accuracy = expected_model.score(X_test, y_test)
+
+		# Make sure that the accuracy reported from both models is the same
+		self.assertEqual( actual_accuracy, expected_accuracy )
+
+		# Test with dataset type: pandas DataFrame
+		# Load up data
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+		X_train, y_train = X.iloc[:120], y.iloc[:120]
+		X_test, y_test =   X.iloc[120:], y.iloc[120:]
+
+		# Bring in the default MLPClassifier model
 		model_name = 'mlp:classifier'
 		actual_model = helper.getBuiltModel(model_name)
 

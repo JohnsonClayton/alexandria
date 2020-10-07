@@ -245,6 +245,9 @@ class Experiment:
     def getMetrics(self):
         return self.metrics_manager.getMetrics()
 
+    def getSummarizedMetrics(self):
+        return self.metrics_manager.printMeasures()
+
     def summarizeMetrics(self):
         metrics = self.metrics_manager.printMeasures()
         metrics_list_format = []
