@@ -2,6 +2,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold
 
 import numpy as np
+import pandas as pd
 
 from tabulate import tabulate
 
@@ -174,6 +175,7 @@ class Experiment:
             if cv:
                 if n_folds > 0:
                     # Cross validation
+                    #print('in train: {}'.format(y))
                     sss = None
                     if shuffle:
                         sss = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=self.random_state)
@@ -190,6 +192,11 @@ class Experiment:
                             X_train, y_train = X[train_idx], y[train_idx]
                             X_val, y_val = X[val_idx], y[val_idx]
                         # TO-DO: Implement for pd.DataFrame and pd.Series objects
+                        elif type(X) == pd.DataFrame and (type(y) == pd.Series or type(y) == list):
+                            X_train, y_train = X.iloc[train_idx], y[train_idx]
+                            X_val, y_val = X.iloc[val_idx], y[val_idx]
+                        else:
+                            raise ValueError('unrecognized datatypes:\n\ttype(X) => {}\n\ttype(y) => {}'.format( str(type(X)), str(type(y)) ))
 
                         for model_name in self.models_dict.keys():
                             model = self.models_dict[model_name]

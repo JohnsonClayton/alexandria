@@ -1300,6 +1300,8 @@ class TestModel(unittest.TestCase):
 		self.assertEqual( precision_calculated, precision_expected )
 
 	def test_predict(self):
+
+		# Test with dataset type: sklearn DataBunch
 		rfmodel = Model('rf', RandomForestClassifier, {'random_state':0})
 		dtmodel = Model('dt', DecisionTreeClassifier, {'random_state':0})
 		iris = load_iris()
@@ -1309,6 +1311,25 @@ class TestModel(unittest.TestCase):
 
 		rfpredictions = rfmodel.predict(iris.data[120:])
 		dtpredictions = dtmodel.predict(iris.data[120:])
+
+		rfactual = [2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2] 
+		dtactual = [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+		
+		self.assertEqual( rfpredictions, rfactual )
+		self.assertEqual( dtpredictions, dtactual )
+
+		# Test with dataset type: pandas DataFrame
+		rfmodel = Model('rf', RandomForestClassifier, {'random_state':0})
+		dtmodel = Model('dt', DecisionTreeClassifier, {'random_state':0})
+		iris_df = load_iris(as_frame=True).frame
+		X = iris_df.loc[:, iris_df.columns != 'target']
+		y = iris_df['target']
+
+		rfmodel.run(X.iloc[:120], y.iloc[:120])
+		dtmodel.run(X.iloc[:120], y.iloc[:120])
+
+		rfpredictions = rfmodel.predict(X.iloc[120:])
+		dtpredictions = dtmodel.predict(X.iloc[120:])
 
 		rfactual = [2, 2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2] 
 		dtactual = [2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]

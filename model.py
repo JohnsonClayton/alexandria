@@ -3,6 +3,7 @@ from metric import MetricsManager, Metric
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 
 import numpy as np
+import pandas as pd
 
 class Model:
 	def __init__(self, name='', constr=None, constr_args=None):
@@ -33,7 +34,6 @@ class Model:
 			return True
 		else:
 			return False
-	
 
 	def getConstructorArgs(self):
 		return self.constructor_args
@@ -107,7 +107,7 @@ class Model:
 
 	def eval(self, X, y, metrics=[]):
 		# Collect all the predictions from the model
-		if (type(X) == list and type(y) == list) or (type(X) == np.ndarray and type(y) == np.ndarray):
+		if (type(X) == list and type(y) == list) or (type(X) == np.ndarray and type(y) == np.ndarray or (type(X) == pd.DataFrame and type(y) == pd.Series)):
 			if len(X) == len(y):
 				y_pred = self.predict(X)
 				return self.calcMetrics(list(y), y_pred, metrics)
