@@ -175,7 +175,6 @@ class Experiment:
             if cv:
                 if n_folds > 0:
                     # Cross validation
-                    #print('in train: {}'.format(y))
                     sss = None
                     if shuffle:
                         sss = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=self.random_state)
@@ -191,7 +190,6 @@ class Experiment:
                         if type(X) == np.ndarray and type(y) == np.ndarray:
                             X_train, y_train = X[train_idx], y[train_idx]
                             X_val, y_val = X[val_idx], y[val_idx]
-                        # TO-DO: Implement for pd.DataFrame and pd.Series objects
                         elif type(X) == pd.DataFrame and (type(y) == pd.Series or type(y) == list):
                             X_train, y_train = X.iloc[train_idx], y[train_idx]
                             X_val, y_val = X.iloc[val_idx], y[val_idx]
@@ -261,7 +259,24 @@ class Experiment:
 
         headers = ['model']
 
+        # Combine statistics where possible (such as acc_avg and acc_std => acc_avg \pm acc_std)
+        metrics_add = {}
         for model_name in metrics.keys():
+            measures = metrics[model_name].getMeasures()
+            metrics_add[model_name] = metrics[model_name].copy()
+            for measure in metrics[model_name].getMeasures():
+                measure_arr = measure.split('_')
+                if len(measure_arr) >= 2 and '_'.join([measure_arr[0], 'avg']) in measures and '_'.join([measure_arr[0], 'std']) in measures:
+                    avg = metrics[model_name].getValue('_'.join([measure_arr[0], 'avg']))
+                    std = metrics[model_name].getValue('_'.join([measure_arr[0], 'std']))
+                    metrics_add[model_name].addValue(measure_arr[0], '{:.4f}\u00B1{:.4f}'.format(avg, std) )
+                    metrics_add[model_name].removeValue('_'.join([measure_arr[0], 'avg']))
+                    metrics_add[model_name].removeValue('_'.join([measure_arr[0], 'std']))
+        metrics = metrics_add
+
+
+        # Create the objecs to hand over to tabulate
+        for model_name in metrics.keys():   
             new_row = [model_name]
             for measure in metrics[model_name].getMeasures():
                 if measure not in headers:

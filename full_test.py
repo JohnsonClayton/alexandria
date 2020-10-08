@@ -257,11 +257,11 @@ class TestMetric(unittest.TestCase):
 		self.assertEqual( metric.getValue('accuracy'), 0.25672837482 )
 
 		try:
-			metric.addValue('accuracy', 'hello!')
+			metric.addValue('accuracy', ['hello!'])
 
 			fail(self)
 		except ValueError as ve:
-			self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'str\'> and type(value) => <class \'str\'>')
+			self.assertEqual( str(ve), 'Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => <class \'str\'> and type(value) => <class \'list\'>')
 
 		try:
 			metric.addValue(['accuracy'], 0.9)

@@ -24,11 +24,24 @@ class Metric:
         else:
             raise ValueError('Equals not supported between Metric and {} classes'.format( type(other) ))
 
+    def copy(self):
+        m = Metric(name=self.name, fold=self.fold_num)
+        for val in self.values.keys():
+            m.addValue(val, self.values[val])
+        return m
+
     def addValue(self, m_type, value):
-        if m_type != None and value != None and type(m_type) == str and ( type(value) == float or type(value) == int or type(value) == np.float64):
+        if m_type != None and value != None and type(m_type) == str and ( type(value) == float or type(value) == int or type(value) == np.float64 or type(value) == str):
             self.values[m_type] = value
         else:
             raise ValueError('Metric.addValue must have \'m_type\' as string and \'value\' as integer or floating point number instead of type(m_type) => {} and type(value) => {}'.format(type(m_type), type(value)))
+
+    def removeValue(self, m_type):
+        if m_type != None and type(m_type) == str:
+            if m_type in self.values:
+                del self.values[m_type]
+        else:
+            raise ValueError('Metric.removeValue must have \'m_type\' as string, not {}'.format(type(m_type)))
 
     def getValue(self, m_type):
         if m_type in self.values:
