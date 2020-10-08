@@ -6,9 +6,14 @@ import pandas as pd
 
 from tabulate import tabulate
 
-from utils import Helper
-from model import Model
-from metric import MetricsManager, Metric
+if __package__ != 'alexandria':
+    from utils import Helper
+    from model import Model
+    from metric import MetricsManager, Metric
+else:
+    from .utils import Helper
+    from .model import Model
+    from .metric import MetricsManager, Metric
 
 class Experiments:
     '''

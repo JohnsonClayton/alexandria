@@ -1,4 +1,7 @@
-from metric import MetricsManager, Metric
+if __package__ != 'alexandria':
+	from metric import MetricsManager, Metric
+else:
+	from .metric import MetricsManager, Metric
 
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 
