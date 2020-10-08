@@ -1,5 +1,8 @@
 # alexandria
-This is a high-level machine learning framework that allows for the users to easily run multiple types of machine learning experiments at the drop of a hat. An example for the API is below:
+This is a high-level machine learning framework that allows for the users to easily run multiple types of machine learning experiments at the drop of a hat. I'm currently working on developing this project, along with the [wiki pages](https://github.com/JohnsonClayton/alexandria/wiki) further.
+
+
+An example for the API is below:
 
 ```python
 # main.py - DataBunch and DataFrame demonstrations
