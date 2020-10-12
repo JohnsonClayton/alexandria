@@ -10,11 +10,10 @@ if __name__ == '__main__':
     iris = load_iris()
     X, y = iris.data, iris.target
 
-    experiment = Experiment('iris example experiment', models=['rf', 'dt', 'ab', 'knn'], exp_type='classification')
+    experiment = Experiment('iris example experiment', models=['rf', 'dt', 'ab', 'knn'], exp_type='classification', metrics=['acc', 'rec', 'prec'])
     experiment.train(
         X, 
-        y, 
-        metrics=['acc', 'rec', 'prec'], 
+        y,  
         cv=True, 
         n_folds=10, 
         shuffle=True)

@@ -224,9 +224,13 @@ class Experiment:
                         for model_name in self.models_dict.keys():
                             model = self.models_dict[model_name]
                             model.run(X_train, y_train)
-                        
-                        # Evaluate the performance of this model and keep track of it
-                        self.eval(X_val, y_val, metrics=metrics, fold_num=fold_num)
+
+                        if metrics:
+                            # Evaluate the performance of this model and keep track of it
+                            self.eval(X_val, y_val, metrics=metrics, fold_num=fold_num)
+                        elif len(self.metrics) > 0:
+                            # Evaluate the performance of this model and keep track of it
+                            self.eval(X_val, y_val, metrics=self.metrics, fold_num=fold_num)
                 else:
                     raise ValueError('Number of folds in cross validation (n_folds) must be larger than zero!')
             else:
