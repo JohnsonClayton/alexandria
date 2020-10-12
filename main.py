@@ -3,6 +3,8 @@ from sklearn.datasets import load_iris
 from experiments import Experiment
 
 if __name__ == '__main__':
+    #__package__ == 'alexandria'
+
     # Data preprocessing
     print('With sklearn DataBunch object...')
     iris = load_iris()

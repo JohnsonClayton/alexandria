@@ -65,17 +65,24 @@ class Experiments:
 
 
 class Experiment:
-    def __init__(self, name='', models=[], exp_type=None):
+    def __init__(self, name='', models=[], exp_type=None, metrics=[]):
         self.helper = Helper()
         self.unnamed_model_count = 0
         self.random_state = 0
+        self._valid_experiment_types = ['classification', 'regression']
 
         self.metrics_manager = MetricsManager()
     
         self.type_of_experiment = None
         if exp_type:
+            if type(exp_type) != str:
+                raise ValueError('Experiment type attribute must be string, not {}'.format( str(type(exp_type)) ))
+
             if self.isValidExperimentType(exp_type):
                 self.type_of_experiment = exp_type
+            else:
+                raise ValueError('The provided experiment type is not supported: \'{}\'\nOnly these experiment types are supported: {}'.format( exp_type, self.getValidExperimentTypes() ))
+            
 
         if type(name) is str:
             if name != '':
@@ -83,7 +90,7 @@ class Experiment:
             else:
                 self.name = 'unnamed_experiment'
         else:
-            raise ValueError('Experiment name attribute must be string: {}'.format(str(name)))
+            raise ValueError('Experiment name attribute must be string, not {}'.format(str( type(name) )))
 
         # initialize the dictionary of models within the experiment
         self.models_dict = {}
@@ -106,12 +113,25 @@ class Experiment:
         else:
             raise ValueError('Models must be in list format if more than one is provided. Ex. models=[\'rf\', \'Decision Tree\', RandomForestClassifer()... ]')
 
+        # initialize the metrics list
+        self.metrics = []
+
+        if type(metrics) is list:
+            self.metrics = metrics
+        elif type(metrics) is str:
+            self.metrics = [metrics]
+        else:
+            raise ValueError('\'metrics\' argument must be string or list of strings. Ex: [\'accuracy\', \'prec\']. Cannot be {}'.format( str(type(metrics)) ))
+
     def getDefaultModelName(self):
         return 'model_' + str(len(self.models_dict))
 
+    def getValidExperimentTypes(self):
+        return self._valid_experiment_types
+
     def isValidExperimentType(self, exp_type):
         if type(exp_type) == str:
-            if exp_type == 'regression' or exp_type == 'classification':
+            if exp_type in self._valid_experiment_types:
                 return True
             else:
                 return False

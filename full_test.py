@@ -35,6 +35,64 @@ class TestExperiment(unittest.TestCase):
 		self.assertEqual( experiment.getName(), 'unnamed_experiment' )
 		self.assertEqual( experiment.getModels(), {} )
 
+		# Check if the name is set correctly
+		name = 'exp_1'
+		experiment = Experiment(name=name)
+		self.assertEqual( experiment.name, name )
+
+		# Check that error is thrown if incorrect name is given
+		name = ['bad', 'name']
+		try:
+			experiment = Experiment(name=name)
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Experiment name attribute must be string, not <class \'list\'>' )
+
+		name = 194500
+		try:
+			experiment = Experiment(name=name)
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Experiment name attribute must be string, not <class \'int\'>' )
+
+
+		# Check if the models is set correctly
+		models = ['rf', 'dt']
+		experiment = Experiment(models=models)
+		self.assertEqual( list(experiment.models_dict.keys()), models )
+
+		# Check is experiment type is set correctly
+		experiment_type = 'classification'
+		experiment = Experiment(exp_type=experiment_type)
+		self.assertEqual( experiment.type_of_experiment, experiment_type )
+
+		# Check that error is thrown if incorrect experiment types are handed over
+		experiment_type = ['hello', 'there']
+		try:
+			experiment = Experiment( exp_type=experiment_type )
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Experiment type attribute must be string, not <class \'list\'>' )
+
+		experiment_type = 7331
+		try:
+			experiment = Experiment( exp_type=experiment_type )
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'Experiment type attribute must be string, not <class \'int\'>' )
+
+		experiment_type = 'definitely_not_regression_pls'
+		try:
+			experiment = Experiment( exp_type=experiment_type )
+
+			fail(self)
+		except ValueError as ve:
+			self.assertEqual( str(ve), 'The provided experiment type is not supported: \'definitely_not_regression_pls\'\nOnly these experiment types are supported: {}'.format(experiment._valid_experiment_types))
+
 	def test_setRandomState(self):
 		experiment = Experiment(name='experiment 1', models=['rf', 'dt'], exp_type='regression')
 		models = experiment.getModels()
@@ -437,7 +495,7 @@ class TestExperiments(unittest.TestCase):
 
 			fail(self)
 		except ValueError as ve:
-			self.assertEqual( str(ve), 'Experiment name attribute must be string: 1' )
+			self.assertEqual( str(ve), 'Experiment name attribute must be string, not <class \'int\'>' )
 		self.assertEqual( experiments.getNumOfExperiments(), 0 )
 
 		experiments.addExperiment( Experiment('1') )
