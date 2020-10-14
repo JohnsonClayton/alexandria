@@ -1,8 +1,9 @@
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import RepeatedStratifiedKFold, StratifiedKFold, cross_val_score
 
 import numpy as np
 import pandas as pd
+from mlxtend.evaluate import paired_ttest_5x2cv 
 
 from tabulate import tabulate
 
@@ -199,6 +200,11 @@ class Experiment:
         if len(X) == len(y):
             if cv:
                 if n_folds > 0:
+                    # If they want a ROC curve, start that
+                    if 'roc' in metrics or 'ROC' in metrics or 'roc' in self.metrics or 'ROC' in self.metrics:
+                        self.metrics_manager.startROCCurve()
+                        print('startedROCCurve')
+
                     # Cross validation
                     sss = None
                     if shuffle:
@@ -231,6 +237,9 @@ class Experiment:
                         elif len(self.metrics) > 0:
                             # Evaluate the performance of this model and keep track of it
                             self.eval(X_val, y_val, metrics=self.metrics, fold_num=fold_num)
+                    if ('roc' in metrics or 'ROC' in metrics) and fold_num == n_folds:
+                        print('reached')
+                        self.metrics_manager.showROCCurve()
                 else:
                     raise ValueError('Number of folds in cross validation (n_folds) must be larger than zero!')
             else:
@@ -262,6 +271,11 @@ class Experiment:
                     metric_object = Metric(model_name, fold=fold_num)
                 else:
                     metric_object = Metric(model_name)
+
+                # If a ROC curve is requested, graph it!
+                if 'roc' in metrics or 'ROC' in metrics:
+                    fpr, tpr, roc_auc = model.calcROC(X, y, self.type_of_experiment)
+                    self.metrics_manager.addToROCCurve(model_name, fpr, tpr, roc_auc)
 
                 model_metrics = model.eval(X, y, metrics)
                 for measure_name in model_metrics.keys():
@@ -332,3 +346,41 @@ class Experiment:
         return self.name
     def getModels(self):
         return self.models_dict
+
+    def compareModels_2x5cv(self, models=[], X=None, y=None, a=0.05):
+        comparison_rows = []
+        headers = ['models', 'model1', 'mean1', 'std1', 'model2', 'mean2', 'std2', 'sig/notsig']
+
+        comparisons_ran = dict()
+
+        for model1 in self.models_dict.keys():
+            if not model1 in comparisons_ran:
+                comparisons_ran[model1] = []
+            for model2 in self.models_dict.keys():
+                if not model2 in comparisons_ran:
+                    comparisons_ran[model2] = []
+                if model1 != model2 and ( model1 not in comparisons_ran[model2] ) and ( model2 not in comparisons_ran[model1] ):
+                    row = ['{} & {}'.format(model1, model2)]
+
+                    row.append(model1)
+                    cv1 = RepeatedStratifiedKFold(n_splits=10, n_repeats=2, random_state=self.random_state)
+                    scores1 = cross_val_score(self.models_dict[model1].getBuiltModel(), X, y, scoring='accuracy', cv=cv1)
+                    row.append(np.mean(scores1))
+                    row.append(np.std(scores1))
+
+                    row.append(model2)
+                    cv2 = RepeatedStratifiedKFold(n_splits=10, n_repeats=2, random_state=self.random_state)
+                    scores2 = cross_val_score(self.models_dict[model2].getBuiltModel(), X, y, scoring='accuracy', cv=cv1)
+                    row.append(np.mean(scores2))
+                    row.append(np.std(scores2))
+
+                    t, p = paired_ttest_5x2cv(estimator1=self.models_dict[model1].getBuiltModel(), estimator2=self.models_dict[model2].getBuiltModel(), X=X, y=y, scoring='accuracy')
+                    if p <= a:
+                        row.append('sig')
+                    else:
+                        row.append('notsig')
+                    comparisons_ran[model1].append(model2)
+                    comparisons_ran[model2].append(model1)
+                    comparison_rows.append(row)
+
+        print( tabulate(comparison_rows, headers=headers) )
