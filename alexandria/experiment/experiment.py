@@ -1,5 +1,8 @@
 
 
-class Experiments:
-    def __init__(self):
-        print('Hello from Experiments!')
+class Experiment:
+    def __init__(self, name):
+        self.name = name
+
+    def getName(self):
+        return self.name

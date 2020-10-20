@@ -7,6 +7,6 @@ setup(name='alexandria',
       author_email='claypjay@gmail.com',
       url='https://github.com/JohnsonClayton/alexandria',
       package_dir={'' : 'alexandria'},
-      py_modules=['examples', 'experiment', 'models', 'tests']
+      py_modules=['examples', 'experiment', 'models', 'metrics', 'tests']
       )
 
