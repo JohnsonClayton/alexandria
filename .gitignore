@@ -1,0 +1,5 @@
+.vscode/
+MANIFEST
+**/__pycache__/
+alexandria/alexandria.egg-info
+dist/
