@@ -2,6 +2,15 @@
 This is a high-level machine learning framework that allows for the users to easily run multiple types of machine learning experiments at the drop of a hat. I'm currently working on developing this project, along with the [wiki pages](https://github.com/JohnsonClayton/alexandria/wiki) further.
 
 
+### Build
+To build from source (which is currently the only way to build this), use the Makefile:  
+```
+$ make
+```  
+This will call the `setup.py` script and will attempt to install the package onto your system. If you find any issues, please create one and I'll get on to it. I haven't done these sorts of things before, so bugs are expected.   
+
+### Example
+
 An example for the API is below:
 
 ```python
