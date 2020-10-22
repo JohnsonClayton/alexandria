@@ -27,6 +27,8 @@ class DatasetManager:
         if ylabels:
             if type(ylabels) == str:
                 self.ylabels = ylabels
+            elif type(ylabels) == list:
+                raise ValueError('Multi-column target is not supported!')
             else:
                 raise ValueError('ylabels argument must be string, not {}'.format( str( type( ylabels ) ) ))
 
@@ -46,6 +48,19 @@ class DatasetManager:
         #   Note that these values can be overwritten by the user if our logic is wrong
         self.num_classes = None
         if self.datatype == Bunch:
+
+            # Check to make sure the provided labels are actually within the sklearn.Bunch object
+            if self.xlabels:
+                if type(self.xlabels) == list:
+                    for xlabel in self.xlabels:
+                        if not hasattr(self.dataset, xlabel):
+                            raise ValueError('{} is not an attribute of the provided dataset!'.format( self.xlabels ))
+                elif type(self.xlabels) == str and not hasattr(self.dataset, self.xlabels):
+                    raise ValueError('{} is not an attribute of the provided dataset!'.format( self.xlabels ))
+            if self.ylabels and type(self.ylabels) == str and not hasattr(self.dataset, self.ylabels):
+                raise ValueError('{} is not an attribute of the provided dataset!'.format( self.ylabels ))
+            
+            # Check if the 'target_names' attribute exists because that will be a clear indicator!
             if hasattr(self.dataset, 'target_names'):
                 self.target_type = 'classification'
                 self.classes = list(self.dataset.target_names)
@@ -76,7 +91,6 @@ class DatasetManager:
                     self.classes = None
                     self.num_classes = None
             else:
-                # TO-DO: Figure out which column name does not exist and report it to the user
                 raise ValueError('These columns don\'t exist in the dataset: {}'.format(not_found))
 
         # Check to make sure provided dataset, xlabels, and ylabels all make sense together
@@ -86,7 +100,7 @@ class DatasetManager:
         if target_type and self.target_type != target_type:
             if type(target_type) == str:
                 if target_type == 'regression' or target_type == 'classification':
-                    warnings.warn('User specified {} target type, but alexandria found {} target type. Assuming the user is correct...')
+                    warnings.warn('User specified {} target type, but alexandria found {} target type. Assuming the user is correct...'.format(target_type, self.target_type))
                     self.target_type = target_type
                 else:
                     raise ValueError('target_type argument must be \'regression\' or \'classification\', not {}'.format( target_type ))
@@ -95,7 +109,7 @@ class DatasetManager:
         
         if num_classes and self.target_type == 'classification' and num_classes != self.num_classes:
             if type(num_classes) == int:
-                warnings.warn('user specified {} classes, but alexandria found {} classes. Assuming user is correct...'.format(self.num_classes, num_classes))
+                warnings.warn('User specified {} classes, but alexandria found {} classes. Assuming user is correct...'.format(num_classes, self.num_classes))
                 self.num_classes = num_classes
             else:
                 raise ValueError('num_classes argument must be integer, not {}'.format( str( type( num_classes ) ) ))
