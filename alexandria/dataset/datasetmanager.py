@@ -10,7 +10,7 @@ class DatasetManager:
 
         self.setData( dataset, xlabels, ylabels )
 
-        self.calcDatasetData()
+        #self.calcDatasetData()
         
         self.setTargetType( target_type )
         self.setNumClasses( num_classes )
@@ -58,6 +58,9 @@ class DatasetManager:
             self.datatype = type(dataset)
 
         self.dataset = dataset
+
+        if self.datatype and self.ylabels:
+            self.calcDatasetData()
 
     def validateBunchLabels(self):
         # Check to make sure the provided labels are actually within the sklearn.Bunch object

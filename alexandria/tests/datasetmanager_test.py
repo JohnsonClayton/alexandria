@@ -203,6 +203,28 @@ class TestDatasetManager(unittest.TestCase):
         self.assertEqual( dm.target_type, 'classification' )
         self.assertEqual( dm.num_classes, 3 )
 
+        # Fail if datatypes for xlabel and ylabel are wrong
+        iris = load_iris()
+        try:
+            xlabels = ['data']
+            ylabels = 512.39
+            dm = DatasetManager()
+            dm.setData(dataset=iris, xlabels=xlabels, ylabels=ylabels)
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'ylabels argument must be string, not {}'.format( type(ylabels)) )
+
+        iris = load_iris()
+        try:
+            xlabels = {'name':'value'}
+            ylabels = ['test1', 'test2']
+            dm = DatasetManager()
+            dm.setData(dataset=iris, xlabels=xlabels, ylabels=ylabels)
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'xlabels argument must be string or list of strings, not {}'.format( type(xlabels)) ) 
 
 
     def test_setX(self):
