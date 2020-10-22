@@ -13,6 +13,14 @@ class TestExperiments(unittest.TestCase):
         experiment_count = exps.numExperiments()
         self.assertEqual( experiment_count, num )
 
+        exps_list = exps.getExperimentsList()
+        self.assertEqual( exps_list[0].getName(), 'default_experiment 1' )
+        self.assertEqual( exps_list[1].getName(), 'default_experiment 2' )
+        self.assertEqual( exps_list[2].getName(), 'default_experiment 3' )
+        self.assertEqual( exps_list[3].getName(), 'default_experiment 4' )
+        self.assertEqual( exps_list[4].getName(), 'default_experiment 5' )
+
+
         # Num cannot be any other data type other than int
         try:
             num = dict()
