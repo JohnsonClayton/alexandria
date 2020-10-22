@@ -14,8 +14,8 @@ class TestExperiment(unittest.TestCase):
         exp = Experiment(name=name)
 
         self.assertEqual( exp.name, name )
-        self.assertEqual( type(exp.dm), DatasetManager )
-        self.assertEqual( type(exp.models), Models )
+        self.assertIsInstance( exp.dm, DatasetManager )
+        self.assertIsInstance( exp.models, Models )
 
         # Fail if Experiment name is not a string
         try:
