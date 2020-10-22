@@ -183,5 +183,60 @@ class TestDatasetManager(unittest.TestCase):
         except ValueError as ve:
             self.assertEqual( str(ve), 'xlabels argument must be string or list of strings, not {}'.format( type(xlabels)) ) 
 
+    def test_setData(self):
+        # Check that we can add the data into the DatasetManager object
+        iris = load_iris()
+        dm = DatasetManager()
+
+        dm.setData(iris)
+        self.assertEqual( dm.dataset, iris )
+        self.assertEqual( dm.xlabels, None )
+        self.assertEqual( dm.xlabels, None )
+        self.assertEqual( dm.target_type, None )
+        self.assertEqual( dm.num_classes, None )
+        xlabels = 'data'
+        ylabels = 'target'
+        dm.setData(iris, xlabels=xlabels, ylabels=ylabels)
+        self.assertEqual( dm.dataset, iris )
+        self.assertEqual( dm.xlabels, xlabels )
+        self.assertEqual( dm.ylabels, ylabels )
+        self.assertEqual( dm.target_type, 'classification' )
+        self.assertEqual( dm.num_classes, 3 )
+
+
+
+    def test_setX(self):
+        fail(self)
+
+    def test_getX(self):
+        fail(self)
+
+    def test_sety(self):
+        fail(self)
+
+    def test_gety(self):
+        fail(self)
+
+    def test_setTargetType(self):
+        fail(self)
+
+    def test_getTargetType(self):
+        fail(self)
+
+    def test_setClasses(self):
+        fail(self)
+
+    def test_getClasses(self):
+        fail(self)
+
+    def test_getNumClasses(self):
+        fail(self)
+
+    def test_validateBunchLabels(self):
+        fail(self)
+
+    def test_validatePandasLabels(self):
+        fail(self)
+
 if __name__ == '__main__':
     unittest.main()
