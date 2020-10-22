@@ -1,5 +1,5 @@
 import unittest
-from sklearn.datasets import load_iris, load_boston, load_diabetes
+from sklearn.datasets import load_iris, load_boston, load_diabetes, load_breast_cancer, load_wine
 import warnings
 
 from alexandria.dataset import DatasetManager
@@ -231,28 +231,223 @@ class TestDatasetManager(unittest.TestCase):
         fail(self)
 
     def test_getX(self):
-        fail(self)
+        # Check that it works as expected
+        iris = load_iris()
+        dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+        expected_X = iris.data
+        actual_X = dm.getX()
+        self.assertTrue( (actual_X == expected_X).any() )
+
+        boston = load_boston()
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+        expected_X = boston.data
+        actual_X = dm.getX()
+        self.assertTrue( (actual_X == expected_X).any() )
+
+        wine = load_wine()
+        dm = DatasetManager(dataset=wine, xlabels='data', ylabels='target')
+        expected_X = wine.data
+        actual_X = dm.getX()
+        self.assertTrue( (actual_X == expected_X).any() )
+
+        iris = load_iris(as_frame=True)
+        iris = iris.frame
+        data_cols = iris.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=iris, xlabels=data_cols, ylabels=target_col)
+        expected_X = iris.loc[:, iris.columns != target_col]
+        actual_X = dm.getX()
+        self.assertTrue( actual_X.equals( expected_X ) )
+
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        expected_X = diabetes.loc[:, diabetes.columns != target_col]
+        actual_X = dm.getX()
+        self.assertTrue( actual_X.equals( expected_X ) )
 
     def test_sety(self):
         fail(self)
 
     def test_gety(self):
-        fail(self)
+        # Check that it works as expected
+        iris = load_iris()
+        dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+        expected_y = iris.target
+        actual_y = dm.gety()
+        self.assertTrue( (actual_y == expected_y).any() )
+
+        boston = load_boston()
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+        expected_y = boston.target
+        actual_y = dm.gety()
+        self.assertTrue( (actual_y == expected_y).any() )
+
+        wine = load_wine()
+        dm = DatasetManager(dataset=wine, xlabels='data', ylabels='target')
+        expected_y = wine.target
+        actual_y = dm.gety()
+        self.assertTrue( (actual_y == expected_y).any() )
+
+        iris = load_iris(as_frame=True)
+        iris = iris.frame
+        data_cols = iris.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=iris, xlabels=data_cols, ylabels=target_col)
+        expected_y = iris[target_col]
+        actual_y = dm.gety()
+        self.assertTrue( actual_y.equals( expected_y ) )
+
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        expected_y = diabetes[target_col]
+        actual_y = dm.gety()
+        self.assertTrue( actual_y.equals( expected_y ) )
 
     def test_setTargetType(self):
-        fail(self)
+        # If the internal logic and user-input disagree, throw a warning notifying the user
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        target_col = 'target'
+        data_cols = ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
+        with warnings.catch_warnings():
+            try:
+                warnings.filterwarnings('error')
+                dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+                dm.setTargetType(target_type='classification')
+    
+                fail(self)
+            except Warning as uw:
+                self.assertEqual( str(uw), 'User specified classification target type, but alexandria found regression target type. Assuming the user is correct...' )
+
+        iris = load_iris()
+        with warnings.catch_warnings():
+            try:
+                warnings.filterwarnings('error')
+                dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+                dm.setTargetType(target_type='regression')
+    
+                fail(self)
+            except Warning as uw:
+                self.assertEqual( str(uw), 'User specified regression target type, but alexandria found classification target type. Assuming the user is correct...' )
 
     def test_getTargetType(self):
         fail(self)
 
-    def test_setClasses(self):
-        fail(self)
-
     def test_getClasses(self):
-        fail(self)
+        # Check that it works as expected
+        iris = load_iris()
+        dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+        expected = ['setosa', 'versicolor', 'virginica']
+        actual = dm.getClasses()
+        self.assertEqual( actual, expected )
+
+        bc = load_breast_cancer(as_frame=True)
+        bc = bc.frame
+        data_cols = bc.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=bc, xlabels=data_cols, ylabels=target_col)
+        expected = [0, 1]
+        actual = dm.getClasses()
+        self.assertEqual( actual, expected )
+
+        wine = load_wine()
+        dm = DatasetManager(dataset=wine, xlabels='data', ylabels='target')
+        expected = ['class_0', 'class_1', 'class_2']
+        actual = dm.getClasses()
+        self.assertEqual( actual, expected )
+
+        # Return None if the target is regression, not classification
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        expected = None
+        actual = dm.getClasses()
+        self.assertEqual( actual, expected )
+
+        boston = load_boston()
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+        expected = None
+        actual = dm.getClasses()
+        self.assertEqual( actual, expected )
+
 
     def test_getNumClasses(self):
-        fail(self)
+        # Check that it works as expected
+        iris = load_iris()
+        dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+        expected = 3
+        actual = dm.getNumClasses()
+        self.assertEqual( actual, expected )
+
+        bc = load_breast_cancer(as_frame=True)
+        bc = bc.frame
+        data_cols = bc.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=bc, xlabels=data_cols, ylabels=target_col)
+        expected = 2
+        actual = dm.getNumClasses()
+        self.assertEqual( actual, expected )
+
+        wine = load_wine()
+        dm = DatasetManager(dataset=wine, xlabels='data', ylabels='target')
+        expected = 3
+        actual = dm.getNumClasses()
+        self.assertEqual( actual, expected )
+
+        # Return None if the target is regression, not classification
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        expected = None
+        actual = dm.getNumClasses()
+        self.assertEqual( actual, expected )
+
+        boston = load_boston()
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+        expected = None
+        actual = dm.getNumClasses()
+        self.assertEqual( actual, expected )
+
+    def test_setNumClasses(self):
+        # Fails if non-integer is provided
+        iris = load_iris()
+        try:
+            dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+            
+            new_num = 3.2
+            dm.setNumClasses( new_num )
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'num_classes argument must be integer, not {}'.format(type(new_num)) )
+
+        # Don't fail if non-integer is added when type is regression
+        boston = load_boston
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+
+        new_num = 3.2
+        dm.setNumClasses( new_num )
+        self.assertEqual( dm.num_classes, None )
+
+        # Check that it throws a warning to the user when the suggested number of classes is different
+        iris = load_iris()
+        with warnings.catch_warnings():
+            try:
+                warnings.filterwarnings('error')
+                dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+                dm.setNumClasses(num_classes=4)
+    
+                fail(self)
+            except Warning as uw:
+                self.assertEqual( str(uw), 'User specified 4 classes, but alexandria found 3 classes. Assuming user is correct...' )
 
     def test_validateBunchLabels(self):
         fail(self)

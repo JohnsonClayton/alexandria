@@ -3,6 +3,7 @@ import warnings
 from sklearn.utils import Bunch
 
 from pandas import DataFrame
+from pandas.core.indexes.base import Index
 class DatasetManager:
     def __init__(self, dataset=None, xlabels=[], ylabels='', target_type='', num_classes=None):
         # Initialize values
@@ -28,10 +29,10 @@ class DatasetManager:
         # Make sure that the provided labels are the correct data types (string or list of strings)
         # TO-DO: Would ints be valid as well?
         self.xlabels = None
-        if xlabels:
+        if len(xlabels) > 0:
             if type(xlabels) == str:
                 self.xlabels = xlabels
-            elif type(xlabels) == list:
+            elif type(xlabels) == list or type(xlabels) == Index:
                 for label in xlabels:
                     if type(label) != str:
                         raise ValueError('xlabels list must only contain strings, not {}'.format( str( type(label) ) ))
@@ -41,7 +42,7 @@ class DatasetManager:
         
         # Usually there is only one target column
         self.ylabels = None
-        if ylabels:
+        if len(ylabels) > 0:
             if type(ylabels) == str:
                 self.ylabels = ylabels
             elif type(ylabels) == list:
@@ -143,3 +144,16 @@ class DatasetManager:
             else:
                 raise ValueError('num_classes argument must be integer, not {}'.format( str( type( num_classes ) ) ))
         
+    def getNumClasses(self):
+        return self.num_classes
+
+    def getClasses(self):
+        return self.classes
+
+    def getX(self):
+        if len(self.xlabels) > 0:
+            return self.dataset[self.xlabels]
+
+    def gety(self):
+        if len(self.ylabels) > 0:
+            return self.dataset[self.ylabels]
