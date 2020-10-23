@@ -157,3 +157,6 @@ class DatasetManager:
     def gety(self):
         if len(self.ylabels) > 0:
             return self.dataset[self.ylabels]
+
+    def getTargetType(self):
+        return self.target_type

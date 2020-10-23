@@ -226,10 +226,6 @@ class TestDatasetManager(unittest.TestCase):
         except ValueError as ve:
             self.assertEqual( str(ve), 'xlabels argument must be string or list of strings, not {}'.format( type(xlabels)) ) 
 
-
-    def test_setX(self):
-        fail(self)
-
     def test_getX(self):
         # Check that it works as expected
         iris = load_iris()
@@ -267,9 +263,6 @@ class TestDatasetManager(unittest.TestCase):
         expected_X = diabetes.loc[:, diabetes.columns != target_col]
         actual_X = dm.getX()
         self.assertTrue( actual_X.equals( expected_X ) )
-
-    def test_sety(self):
-        fail(self)
 
     def test_gety(self):
         # Check that it works as expected
@@ -337,7 +330,43 @@ class TestDatasetManager(unittest.TestCase):
                 self.assertEqual( str(uw), 'User specified regression target type, but alexandria found classification target type. Assuming the user is correct...' )
 
     def test_getTargetType(self):
-        fail(self)
+        # Check that it works as expected
+        iris = load_iris()
+        dm = DatasetManager(dataset=iris, xlabels='data', ylabels='target')
+        expected = 'classification'
+        actual = dm.getTargetType()
+        self.assertEqual( actual, expected )
+
+        bc = load_breast_cancer(as_frame=True)
+        bc = bc.frame
+        data_cols = bc.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=bc, xlabels=data_cols, ylabels=target_col)
+        expected = 'classification'
+        actual = dm.getTargetType()
+        self.assertEqual( actual, expected )
+
+        wine = load_wine()
+        dm = DatasetManager(dataset=wine, xlabels='data', ylabels='target')
+        expected = 'classification'
+        actual = dm.getTargetType()
+        self.assertEqual( actual, expected )
+
+        # Return None if the target is regression, not classification
+        diabetes = load_diabetes(as_frame=True)
+        diabetes = diabetes.frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        dm = DatasetManager(dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        expected = 'regression'
+        actual = dm.getTargetType()
+        self.assertEqual( actual, expected )
+
+        boston = load_boston()
+        dm = DatasetManager(dataset=boston, xlabels='data', ylabels='target')
+        expected = 'regression'
+        actual = dm.getTargetType()
+        self.assertEqual( actual, expected )
 
     def test_getClasses(self):
         # Check that it works as expected
@@ -448,12 +477,6 @@ class TestDatasetManager(unittest.TestCase):
                 fail(self)
             except Warning as uw:
                 self.assertEqual( str(uw), 'User specified 4 classes, but alexandria found 3 classes. Assuming user is correct...' )
-
-    def test_validateBunchLabels(self):
-        fail(self)
-
-    def test_validatePandasLabels(self):
-        fail(self)
 
 if __name__ == '__main__':
     unittest.main()
