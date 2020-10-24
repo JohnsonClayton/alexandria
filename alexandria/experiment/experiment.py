@@ -1,5 +1,5 @@
 from alexandria.dataset import DatasetManager
-from alexandria.models import Models
+from alexandria.models import ModelsManager
 
 class Experiment:
     def __init__(self, name):
@@ -12,7 +12,7 @@ class Experiment:
         self.dm = DatasetManager()
 
         # Initialize the models object
-        self.models = Models()
+        self.models_manager = ModelsManager()
 
     def getName(self):
         return self.name

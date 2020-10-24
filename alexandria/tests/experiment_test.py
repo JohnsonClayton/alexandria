@@ -2,7 +2,7 @@ import unittest
 
 from alexandria.experiment import Experiment
 from alexandria.dataset import DatasetManager
-from alexandria.models import Models
+from alexandria.models import ModelsManager
 
 def fail(who):
     who.assertTrue( False )
@@ -15,7 +15,7 @@ class TestExperiment(unittest.TestCase):
 
         self.assertEqual( exp.name, name )
         self.assertIsInstance( exp.dm, DatasetManager )
-        self.assertIsInstance( exp.models, Models )
+        self.assertIsInstance( exp.models_manager, ModelsManager )
 
         # Fail if Experiment name is not a string
         try:
