@@ -20,6 +20,9 @@ class SklearnModel(Model):
             self.setExperimentType(exp_type)
         else:
             self.exp_type = exp_type
+
+    def getArguments(self):
+        return self.default_args
         
 
     def setExperimentType(self, exp_type):
