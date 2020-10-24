@@ -16,16 +16,30 @@ class RandomForest(SklearnModel):
                 'random_state': 0
             }
         
-    def train(self, X, y, exp_type):
-        if type(exp_type) == str:
-            if exp_type == 'regression':
+    def train(self, X, y, exp_type=''):
+        # if the experiment type is specified, then set it
+        if exp_type:
+            self.setExperimentType(exp_type)
+        
+        # Set up the model 
+        if self.exp_type:
+            if self.exp_type == 'regression':
                 self.model = RandomForestRegressor(**self.default_args)
-            elif exp_type == 'classification':
+            elif self.exp_type == 'classification':
                 self.model = RandomForestClassifier(**self.default_args)
             else:
-                raise ValueError('Experiment type must be \'classification\' or \'regression\', not {}'.format( experiment_type ))
-        
+                raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
+            
+            # Train the model
+            super().train(X, y)
         else:
-            raise ValueError('Experiment type must be string type, not {}'.format( str( type(experiment_type) ) ))
+            raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
         
-        super().train(X, y)
+    def predict_proba(self, X):
+        if self.exp_type:
+            if self.exp_type == 'classification':
+                return super().predict_proba(X)
+            else:
+                raise NotImplementedError('The \'predict_proba\' method is not implemented for regression problems (this is an scikit-learn issue, not an alexandria issue!)')
+        else:
+            raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
