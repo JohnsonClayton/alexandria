@@ -62,6 +62,9 @@ class Model:
 		else:
 			raise ValueError('Name must be string type: {}'.format(name))
 
+	def getBuiltModel(self):
+		return self.constructor(**self.constructor_args)
+
 	def run(self, X, y, metrics=[]):
 		if len(X) == len(y):
 			self.model = self.constructor(**self.constructor_args)
