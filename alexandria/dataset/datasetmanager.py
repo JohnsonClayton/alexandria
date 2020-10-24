@@ -29,26 +29,26 @@ class DatasetManager:
         # Make sure that the provided labels are the correct data types (string or list of strings)
         # TO-DO: Would ints be valid as well?
         self.xlabels = None
-        if len(xlabels) > 0:
-            if type(xlabels) == str:
-                self.xlabels = xlabels
-            elif type(xlabels) == list or type(xlabels) == Index:
+        if type(xlabels) == str:
+            self.xlabels = xlabels
+        elif (type(xlabels) == list or type(xlabels) == Index):
+            if len(xlabels) > 0:
                 for label in xlabels:
                     if type(label) != str:
                         raise ValueError('xlabels list must only contain strings, not {}'.format( str( type(label) ) ))
                 self.xlabels = xlabels
-            else:
-                raise ValueError('xlabels argument must be string or list of strings, not {}'.format( str( type( xlabels ) ) ))
+        else:
+            raise ValueError('xlabels argument must be string or list of strings, not {}'.format( str( type( xlabels ) ) ))
         
         # Usually there is only one target column
         self.ylabels = None
-        if len(ylabels) > 0:
-            if type(ylabels) == str:
+        if type(ylabels) == str:
+            if ylabels != '':
                 self.ylabels = ylabels
-            elif type(ylabels) == list:
-                raise ValueError('Multi-column target is not supported!')
-            else:
-                raise ValueError('ylabels argument must be string, not {}'.format( str( type( ylabels ) ) ))
+        elif type(ylabels) == list:
+            raise ValueError('Multi-column target is not supported!')
+        else:
+            raise ValueError('ylabels argument must be string, not {}'.format( str( type( ylabels ) ) ))
 
         # Figure out what datatype the dataset is
         try:
