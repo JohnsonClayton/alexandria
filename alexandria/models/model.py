@@ -1,3 +1,9 @@
+from abc import abstractmethod
+
 class Model:
-    def __init__(self, args=None):
-        print('Model init reached!')
+    def __init__(self):
+        self.model = None
+
+    @abstractmethod
+    def train(self):
+        pass
