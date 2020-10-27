@@ -2,7 +2,7 @@ from alexandria.dataset import DatasetManager
 from alexandria.models import ModelsManager
 
 class Experiment:
-    def __init__(self, name, libs=None, models=None, modellibdict=None):
+    def __init__(self, name, dataset=None, xlabels=None, ylabels=None, libs=None, models=None, modellibdict=None):
         if type(name) == str:
             self.name = name
         else:
@@ -10,9 +10,14 @@ class Experiment:
         
         # Initialize the dataset manager object
         self.dm = DatasetManager()
+        if type(dataset) != type(None):
+            if type(xlabels) == type(None) or type(ylabels) == type(None):
+                self.dm.setData(dataset)
+            else:
+                self.dm.setData(dataset=dataset, xlabels=xlabels, ylabels=ylabels)
 
         # Initialize the models object
-        self.models_manager = ModelsManager()
+        self.mm = ModelsManager()
 
         # Add the provided model information
         self.addModels(libs=libs, models=models, modellibdict=modellibdict)
@@ -24,14 +29,14 @@ class Experiment:
     def addModels(self, modellibdict=None, libs=None, models=None):
         # We can hand this data over
         if modellibdict != None:
-            self.models_manager.addModels( modellibdict )
+            self.mm.addModels( modellibdict )
 
         # If model values were specified, we must translate them into a dictionary
         #   for the model manager
         else:
             if libs != None and models != None:
                 modellibdict = self.createForModelsManager(libs=libs, models=models)
-                self.models_manager.addModels( modellibdict )
+                self.mm.addModels( modellibdict )
 
 
     def createForModelsManager(self, libs=[], models=[]):
@@ -64,7 +69,7 @@ class Experiment:
             raise ValueError('Experiment \'name\' argument must be string, not {}'.format(  str( type( name ) ) ))
        
     def getModels(self, aslist=False):
-        return self.models_manager.getModels(aslist)
+        return self.mm.getModels(aslist)
 
     def getNumModels(self):
-        return len(self.models_manager.getNumModels())
+        return len(self.mm.getNumModels())

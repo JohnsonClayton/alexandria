@@ -2,9 +2,10 @@ import unittest
 
 from alexandria.experiment import Experiment
 from alexandria.dataset import DatasetManager
-from alexandria.models import ModelsManager
+from alexandria.models import ModelsManager, sklearn
 
-from alexandria.models import sklearn
+from sklearn.datasets import load_iris, load_diabetes
+
 
 def fail(who):
     who.assertTrue( False )
@@ -17,7 +18,7 @@ class TestExperiment(unittest.TestCase):
 
         self.assertEqual( exp.name, name )
         self.assertIsInstance( exp.dm, DatasetManager )
-        self.assertIsInstance( exp.models_manager, ModelsManager )
+        self.assertIsInstance( exp.mm, ModelsManager )
 
         # Fail if Experiment name is not a string
         try:
@@ -90,6 +91,30 @@ class TestExperiment(unittest.TestCase):
         self.assertIsInstance( models[1], sklearn.DecisionTree )
 
 
+        # Check that we can add a dataset to the datasetmanager from the constructor
+        iris = load_iris()
+        exp = Experiment(name='experiment 1', dataset=iris, xlabels='data', ylabels='target')
+        self.assertEqual( exp.dm.dataset, iris )
+        self.assertEqual( exp.dm.target_type, 'classification' )
+
+        iris = load_iris(as_frame=True).frame
+        data_cols = iris.columns[:-1]
+        target_col = 'target'
+        exp = Experiment(name='experiment 1', dataset=iris, xlabels=data_cols, ylabels=target_col)
+        self.assertTrue( iris.equals( exp.dm.dataset ) )
+        self.assertEqual( exp.dm.target_type, 'classification' )
+
+        diabetes = load_diabetes()
+        exp = Experiment(name='experiment 1', dataset=diabetes, xlabels='data', ylabels='target')
+        self.assertEqual( exp.dm.dataset, diabetes )
+        self.assertEqual( exp.dm.target_type, 'regression' )
+
+        diabetes = load_diabetes(as_frame=True).frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        exp = Experiment(name='experiment 1', dataset=diabetes, xlabels=data_cols, ylabels=target_col)
+        self.assertTrue( diabetes.equals( exp.dm.dataset ) )
+        self.assertEqual( exp.dm.target_type, 'regression' )
 
     def test_setName(self):
         # Check that it will set the Experiment name
