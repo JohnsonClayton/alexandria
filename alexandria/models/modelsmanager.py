@@ -32,8 +32,15 @@ class ModelsManager:
         else:
             raise ValueError('default library argument must be string type, not {}'.format( str( type(default_library) ) ))
 
+    def getModels(self, aslist=False):
+        if aslist:
+            return list( self.models.values() )
+        return self.models
 
-    def getModelID(self):
+    def getNumModels(self):
+        return len(self.models)
+
+    def createModelID(self):
         return int( 10000*random.random())
 
     def addModel(self, model, lib='', **args):
@@ -54,12 +61,66 @@ class ModelsManager:
         model_obj = self.getObjectFromName(model=model, lib=lib)
         if model_obj and issubclass( model_obj, Model ):
             # Need to generate ID for the model and avoid repeats
-            model_id = self.getModelID()
+            model_id = self.createModelID()
             while model_id in self.models:
-                model_id = self.getModelID()
+                model_id = self.createModelID()
 
             self.models[ model_id ] = model_obj(id=model_id, **args)
+
+    def addModels(self, modelslibsdict):
+        # We are expecting a dictionary where each entry is library1 => [model1, model2], library2 => [model3], etc
+        '''
+        Below is an example of a structure that would be valid here
+        modelslibdict = {
+            'sklearn': [
+                {
+                    'model': 'random forest',
+                    'args': {
+                        'random_state': 512,
+                        'n_estimators': 250
+                    }
+                },
+                {
+                    'model': 'dt',
+                    'args': {
+                        'random_state': 219,
+                        'max_depth': 4
+                    }
+                },
+                'knn',
+                'mlp'
+            ],
+            'library2': 'classifier',
+            etc...
+        }
+
+        Please note that this method wasn't built to be user-friendly. If you want user-friendly, add the
+          models through the Experiment or Experiments classes! They exist to act as intermediaries!
+
+        '''
         
+        if type(modelslibsdict) == dict:
+            # All of these libraries must be strings
+            for lib in modelslibsdict.keys():
+                if type(lib) != str:
+                    raise ValueError('library names must be strings!')
+
+            for lib, models in modelslibsdict.items():
+                if type(models) == str:
+                    self.addModel(lib=lib, model=models)
+                elif type(models) == list:
+                    for model in models:
+                        if type(model) == str:
+                            self.addModel(lib=lib, model=model)
+                        elif type(model) == dict and 'model' in model and 'args' in model:
+                            self.addModel(lib=lib, model=model['model'], default_args=model['args'])
+                elif type(models) == dict and 'model' in models and 'args' in models:
+                            self.addModel(lib=lib, model=models['model'], default_args=models['args'])
+                else:
+                    raise ValueError('models in dictionary must be in string, list (of string), or dictionary types! If in dictionary types, then both \'model\' and \'args\' attributes must be present!')
+        else:
+            raise NotImplementedError('Cannot add models from non-dictionary type. Use Experiment class as intermediary or change to dictionary')    
+
     # This method will find the specific object we need to use for a given string
     def getObjectFromName(self, model, lib=''):
         obj = None
@@ -73,6 +134,8 @@ class ModelsManager:
                 # It is a scikit-learn model
                 if model == 'Random Forest':
                    obj = sklearn.RandomForest
+                elif model == 'Decision Tree':
+                    obj = sklearn.DecisionTree
         else:
             # We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up

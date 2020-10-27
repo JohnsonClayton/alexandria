@@ -159,7 +159,6 @@ class TestModelsManager(unittest.TestCase):
         # TO-DO: Make sure we can add a model hand-crafted by the user
         # Model object (alexandria object)
         # ML Library object
-        raise NotImplementedError('Incomplete to-do: Allow hand-crafted models to be added to the models manager')
 
     def test_getObjectFromName(self):
         # Check that all the models can be found using all possible paths
@@ -212,7 +211,26 @@ class TestModelsManager(unittest.TestCase):
         except ValueError as ve:
             self.assertEqual( str(ve), 'model argument must be string type, not {}'.format( str( type(lib) ) ) )
 
-    
+    def test_addModels(self):
+        mm = ModelsManager()
+
+        self.assertEqual( mm.getNumModels(), 0 )
+
+        modelstoadd = {
+            'sklearn': [
+                {
+                    'model': 'random forest',
+                    'args': {
+                        'random_state': 19,
+                        'n_estimators': 250
+                    }
+                },
+                'decision tree'
+            ]
+        }
+        mm.addModels(modelstoadd)
+
+        self.assertEqual( mm.getNumModels(), 2 )
 
 if __name__ == '__main__':
     unittest.main()
