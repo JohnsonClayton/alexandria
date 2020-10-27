@@ -298,16 +298,27 @@ class TestExperiment(unittest.TestCase):
         expected_predictions = {
             8444: {
                 'name': 'sklearn.random forest',
-                'predictions': rf.predict(X_test)
+                'predictions': ( rf.predict(X_test) ).tolist()
             },
             7579: {
                 'name': 'sklearn.decision tree',
-                'predictions': dt.predict(X_test)
+                'predictions': ( dt.predict(X_test) ).tolist()
             }
         }
         actual_predictions = exp.predict(X_test)
 
-        self.assertListEqual( list(actual_predictions), list(expected_predictions) )
+        self.assertTrue( 8444 in actual_predictions )
+        self.assertTrue( 'name' in actual_predictions[ 8444 ] )
+        self.assertTrue( 'predictions' in actual_predictions[ 8444 ] )
+        self.assertEqual( actual_predictions[ 8444 ]['name'], 'sklearn.random forest' )
+        self.assertListEqual( actual_predictions[ 8444 ]['predictions'], expected_predictions[ 8444 ]['predictions'] )
+        
+        self.assertTrue( 7579 in actual_predictions )
+        self.assertTrue( 'name' in actual_predictions[ 7579 ] )
+        self.assertTrue( 'predictions' in actual_predictions[ 7579 ] )
+        self.assertEqual( actual_predictions[ 7579 ]['name'], 'sklearn.decision tree' )
+        self.assertListEqual( actual_predictions[ 7579 ]['predictions'], expected_predictions[ 7579 ]['predictions'] )
+
 
 if __name__ == '__main__':
     unittest.main()

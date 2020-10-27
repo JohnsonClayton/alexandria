@@ -221,7 +221,7 @@ class ModelsManager:
             if self.isSklearn( model ):
                 preds[ id ] = {
                     'name': model.lib + '.' + model.model_name,
-                    'predictions': model.predict( X ) 
+                    'predictions': ( model.predict( X ) ).tolist()
                 }
 
         return preds
