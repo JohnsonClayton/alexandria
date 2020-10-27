@@ -2,8 +2,10 @@ import warnings
 
 from sklearn.utils import Bunch
 
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pandas.core.indexes.base import Index
+
+import numpy as np
 class DatasetManager:
     def __init__(self, dataset=None, xlabels=[], ylabels='', target_type='', num_classes=None):
         # Initialize values
@@ -160,3 +162,20 @@ class DatasetManager:
 
     def getTargetType(self):
         return self.target_type
+
+    def getExperimentTypeOf(self, y):
+        exp_type = ''
+        if type(y) == np.ndarray:
+            if len(np.unique(y)) < 0.25*len(y):
+                exp_type = 'classification'
+            else:
+                exp_type = 'regression'
+        elif type(y) == Series:
+            if np.nunique(y) < 0.25*len(y):
+                exp_type = 'classification'
+            else:
+                exp_type = 'regression'
+        else:
+            raise ValueError('Unknown data type: {}'.format( str( type( y ) ) ))
+        
+        return exp_type

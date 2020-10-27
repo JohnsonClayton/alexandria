@@ -204,3 +204,25 @@ class ModelsManager:
         else:
             raise ValueError('Model name must be string type, not {}'.format(  str( type(model) )))
 
+    def isSklearn(self, model):
+        if isinstance(model, sklearn.SklearnModel):
+            return True
+        else:
+            return False
+
+    def trainModelsOnXy(self, X, y, exp_type):
+        for model in self.models.values():
+            if self.isSklearn( model ):
+                model.train(X, y, exp_type)
+
+    def generateModelPredictions(self, X):
+        preds = dict()
+        for id, model in self.models.items():
+            if self.isSklearn( model ):
+                preds[ id ] = {
+                    'name': model.lib + '.' + model.model_name,
+                    'predictions': model.predict( X ) 
+                }
+
+        return preds
+            

@@ -5,6 +5,8 @@ from alexandria.dataset import DatasetManager
 from alexandria.models import ModelsManager, sklearn
 
 from sklearn.datasets import load_iris, load_diabetes
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 
 def fail(who):
@@ -50,6 +52,13 @@ class TestExperiment(unittest.TestCase):
 
         # Provide one library and a list (or single) of models
         exp = Experiment(name='experiment 1', libs='sklearn', models=['rf', 'dt'])
+        models = exp.getModels(aslist=True)
+        self.assertEqual( len(models), 2 )
+        self.assertIsInstance( models[0], sklearn.RandomForest )
+        self.assertIsInstance( models[1], sklearn.DecisionTree )
+
+        print('begin interesting bit')
+        exp = Experiment(name='experiment 1', models=['rf', 'dt'])
         models = exp.getModels(aslist=True)
         self.assertEqual( len(models), 2 )
         self.assertIsInstance( models[0], sklearn.RandomForest )
@@ -268,6 +277,37 @@ class TestExperiment(unittest.TestCase):
         self.assertIsInstance( models[0], sklearn.RandomForest )
         self.assertEqual( models[0].default_args, default_args )
         self.assertIsInstance( models[1], sklearn.DecisionTree )
+
+    def test_train(self):
+        # Check that we can train the model a few different ways
+        # Data preprocessing
+        iris = load_iris()
+        X_train, y_train = iris.data[:120], iris.target[:120]
+        X_test, y_test = iris.data[120:], iris.target[120:]
+        exp = Experiment(name='experiment 1', models=['rf', 'dt'])
+
+        exp.train(X_train, y_train)
+        
+        # Set up the classifiers to compare against
+        rf = RandomForestClassifier(random_state=0)
+        rf.fit(X_train, y_train)
+        dt = DecisionTreeClassifier(random_state=0)
+        dt.fit(X_train, y_train)
+
+        # Generate the expected and actual results
+        expected_predictions = {
+            8444: {
+                'name': 'sklearn.random forest',
+                'predictions': rf.predict(X_test)
+            },
+            7579: {
+                'name': 'sklearn.decision tree',
+                'predictions': dt.predict(X_test)
+            }
+        }
+        actual_predictions = exp.predict(X_test)
+
+        self.assertListEqual( list(actual_predictions), list(expected_predictions) )
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,13 +34,17 @@ class Experiment:
         # If model values were specified, we must translate them into a dictionary
         #   for the model manager
         else:
-            if libs != None and models != None:
+            if models != None:
                 modellibdict = self.createForModelsManager(libs=libs, models=models)
                 self.mm.addModels( modellibdict )
 
 
     def createForModelsManager(self, libs=[], models=[]):
         return_dict = dict()
+        
+        # If libs is None, then we will assume the default library on the other end
+        if libs == None:
+            libs = ''
 
         # If the libs argument is a string, then add all the models with this library
         if type(libs) == str:
@@ -54,7 +58,6 @@ class Experiment:
                             return_dict[ lib ].append(model)
                         else:
                             return_dict[ lib ] = [ model ]
-
 
         return return_dict                            
 
@@ -73,3 +76,12 @@ class Experiment:
 
     def getNumModels(self):
         return len(self.mm.getNumModels())
+
+    def train(self, X=None, y=None):
+        if type(X) != None and type(y) != None:
+            exp_type = self.dm.getExperimentTypeOf(y)
+            self.mm.trainModelsOnXy(X, y, exp_type)
+
+    def predict(self, X=None):
+        if type(X) != None:
+            return self.mm.generateModelPredictions(X)
