@@ -5,8 +5,9 @@ from alexandria.dataset import DatasetManager
 from alexandria.models import ModelsManager, sklearn
 
 from sklearn.datasets import load_iris, load_diabetes
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.model_selection import train_test_split
 
 
 def fail(who):
@@ -306,6 +307,58 @@ class TestExperiment(unittest.TestCase):
             }
         }
         actual_predictions = exp.predict(X_test)
+
+        self.assertTrue( 8444 in actual_predictions )
+        self.assertTrue( 'name' in actual_predictions[ 8444 ] )
+        self.assertTrue( 'predictions' in actual_predictions[ 8444 ] )
+        self.assertEqual( actual_predictions[ 8444 ]['name'], 'sklearn.random forest' )
+        self.assertListEqual( actual_predictions[ 8444 ]['predictions'], expected_predictions[ 8444 ]['predictions'] )
+        
+        self.assertTrue( 7579 in actual_predictions )
+        self.assertTrue( 'name' in actual_predictions[ 7579 ] )
+        self.assertTrue( 'predictions' in actual_predictions[ 7579 ] )
+        self.assertEqual( actual_predictions[ 7579 ]['name'], 'sklearn.decision tree' )
+        self.assertListEqual( actual_predictions[ 7579 ]['predictions'], expected_predictions[ 7579 ]['predictions'] )
+
+        # Test training where we hand the data to the Experiment object upfront
+        diabetes = load_diabetes(as_frame=True).frame
+        data_cols = diabetes.columns[:-1]
+        target_col = 'target'
+        exp = Experiment(
+            name='experiment 1', 
+            dataset=diabetes, 
+            xlabels=data_cols, 
+            ylabels=target_col, 
+            models=['rf', 'dt']
+            )
+        exp.train(train_size=0.8, shuffle=True, random_state=0)
+
+        # Set up the classifiers to compare against
+        X_train, X_test, y_train, y_test = train_test_split(
+            diabetes[data_cols],
+            diabetes[target_col],
+            train_size=0.8,
+            shuffle=True,
+            random_state=0
+        )
+
+        rf = RandomForestRegressor(random_state=0)
+        rf.fit(X_train, y_train)
+        dt = DecisionTreeRegressor(random_state=0)
+        dt.fit(X_train, y_train)
+
+        # Generate the expected and actual results
+        expected_predictions = {
+            8444: {
+                'name': 'sklearn.random forest',
+                'predictions': ( rf.predict(X_test) ).tolist()
+            },
+            7579: {
+                'name': 'sklearn.decision tree',
+                'predictions': ( dt.predict(X_test) ).tolist()
+            }
+        }
+        actual_predictions = exp.predict()
 
         self.assertTrue( 8444 in actual_predictions )
         self.assertTrue( 'name' in actual_predictions[ 8444 ] )

@@ -77,11 +77,22 @@ class Experiment:
     def getNumModels(self):
         return len(self.mm.getNumModels())
 
-    def train(self, X=None, y=None):
-        if type(X) != None and type(y) != None:
+    def train(self, X=None, y=None, *args, **kwargs):
+        X = X
+        y = y
+        exp_type = ''
+        if type(X) == type(None) or type(y) == type(None):
+            self.dm.splitData(*args, **kwargs)
+            X, y = self.dm.getXtrain(), self.dm.getytrain()
+            exp_type = self.dm.target_type
+        else:
             exp_type = self.dm.getExperimentTypeOf(y)
-            self.mm.trainModelsOnXy(X, y, exp_type)
+
+        # Train the models on the provided data
+        self.mm.trainModelsOnXy(X, y, exp_type)
 
     def predict(self, X=None):
-        if type(X) != None:
+        if type(X) != type(None):
             return self.mm.generateModelPredictions(X)
+        else:
+            return self.mm.generateModelPredictions( self.dm.getXtest() )

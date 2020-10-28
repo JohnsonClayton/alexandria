@@ -5,12 +5,13 @@ from sklearn.utils import Bunch
 from pandas import DataFrame, Series
 from pandas.core.indexes.base import Index
 
+from sklearn.model_selection import train_test_split
+
 import numpy as np
 class DatasetManager:
     def __init__(self, dataset=None, xlabels=[], ylabels='', target_type='', num_classes=None):
         # Initialize values
         self.reset()
-
         self.setData( dataset, xlabels, ylabels )
 
         #self.calcDatasetData()
@@ -179,3 +180,33 @@ class DatasetManager:
             raise ValueError('Unknown data type: {}'.format( str( type( y ) ) ))
         
         return exp_type
+
+    def splitData(self, *args, **kwargs): #train_size=None, test_size=None, shuffle=False, stratify=False, random_state=0):
+        if self.datatype != None:
+            # Use scikit-learn's library to split the dataset
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+                self.dataset[ self.xlabels ],
+                self.dataset[ self.ylabels ],
+                train_size=0.8,
+                shuffle=True,
+                random_state=0)
+                #train_size=train_size,
+                #test_size=test_size,
+                #shuffle=shuffle,
+                #stratify=stratify,
+                #random_state=random_state
+            #)
+        else:
+            raise ValueError('DatasetManager object does not know what data to use!')
+
+    def getXtrain(self):
+        return self.X_train
+    
+    def getytrain(self):
+        return self.y_train
+
+    def getXtest(self):
+        return self.X_test
+
+    def getytest(self):
+        return self.y_test
