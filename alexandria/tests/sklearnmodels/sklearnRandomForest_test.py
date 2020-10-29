@@ -4,6 +4,8 @@ from alexandria.models.sklearn import RandomForest
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.datasets import load_iris, load_boston, load_diabetes, load_wine
+from sklearn.metrics import accuracy_score, recall_score, precision_score, r2_score
+from sklearn.model_selection import train_test_split
 
 
 def fail(who):
@@ -450,7 +452,167 @@ class TestSklearnRandomForest(unittest.TestCase):
         except ValueError as ve:
             self.assertEqual( str(ve), 'Experiment type argument must be \'classification\' or \'regression\', not {}'.format( exp_type ))
 
+    def test_eval(self):
+        # Check to make sure that the model will evaluate as expected with sklearn.Bunch objects
         
+        # Classification
+        #  sklearn.Bunch
+        data = load_iris()
+        X_train, y_train = data.data[:120], data.target[:120]
+        X_test, y_test = data.data[120:], data.target[120:]
+
+
+        # All '2' variables are the baseline test and what we should match up with
+        default_args = {'random_state': 19}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestClassifier(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='classification')
+        rf2.fit(X_train, y_train)
+
+        rf1.eval(X_test, y_test, metrics='acc')
+        actual_acc = rf1.getMetric('acc')
+        preds = rf2.predict(X_test)
+        expected_acc = accuracy_score(y_test, preds)
+        self.assertEqual( actual_acc, expected_acc )
+
+        # Error if r-squared is wanted in classification problem
+        # Recall
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='classification')
+        rf2.fit(X_train, y_train)
+        try:
+            rf1.eval(X_test, y_test, metrics='r2')
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'cannot use R2 metric for classification problem!' )
+    
+        #   pandas.DataFrame
+        data = load_iris(as_frame=True).frame
+        data_cols = data.columns[:-1]
+        target_col = 'target'
+        X_train, X_test, y_train, y_test = train_test_split(data[data_cols], data[target_col], train_size=0.8, random_state=0)
+
+        default_args = {'random_state': 19}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestClassifier(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='classification')
+        rf2.fit(X_train, y_train)
+
+        rf1.eval(X_test, y_test, metrics=['acc', 'precision', 'recall'])
+        actual_acc = rf1.getMetric('acc')
+        actual_prec = rf1.getMetric('prec')
+        actual_rec = rf1.getMetric('rec')
+        preds = rf2.predict(X_test)
+        expected_acc = accuracy_score(y_test, preds)
+        expected_prec = precision_score(y_test, preds, average='weighted')
+        expected_rec = recall_score(y_test, preds, average='weighted')
+        self.assertEqual( actual_acc, expected_acc )
+        self.assertEqual( actual_prec, expected_prec )
+        self.assertEqual( actual_rec, expected_rec )
+
+        # Error if r-squared is wanted in classification problem
+        # Recall
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='classification')
+        rf2.fit(X_train, y_train)
+        try:
+            rf1.eval(X_test, y_test, metrics='r2')
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'cannot use R2 metric for classification problem!' )
+
+
+        # Regression
+        #  sklearn.Bunch
+        data = load_boston()
+        X_train, y_train = data.data[:120], data.target[:120]
+        X_test, y_test = data.data[120:], data.target[120:]
+
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='regression')
+        rf2.fit(X_train, y_train)
+
+        rf1.eval(X_test, y_test, metrics=['r2'])
+        actual_r2 = rf1.getMetric('r2')
+        preds = rf2.predict(X_test)
+        expected_r2 = r2_score(y_test, preds)
+        self.assertEqual( actual_r2, expected_r2 )
+
+        # Error if accuracy, recall, etc is wanted in a regression problem
+        # Recall
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='regression')
+        rf2.fit(X_train, y_train)
+        try:
+            rf1.eval(X_test, y_test, metrics='recall')
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'cannot use Recall metric for regression problem!' )
+        
+        # Accuracy
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='regression')
+        rf2.fit(X_train, y_train)
+        try:
+            rf1.eval(X_test, y_test, metrics='accuracy')
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'cannot use Accuracy metric for regression problem!' )
+
+        # Precision
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='regression')
+        rf2.fit(X_train, y_train)
+        try:
+            rf1.eval(X_test, y_test, metrics='prec')
+
+            fail(self)
+        except ValueError as ve:
+            self.assertEqual( str(ve), 'cannot use Precision metric for regression problem!' )
+
+
+        #   pandas.DataFrame
+        data = load_diabetes(as_frame=True).frame
+        data_cols = data.columns[:-1]
+        target_col = 'target'
+        X_train, X_test, y_train, y_test = train_test_split(data[data_cols], data[target_col], train_size=0.8, random_state=0)
+
+        default_args = {'random_state': 30}
+        rf1 = RandomForest(default_args=default_args)
+        rf2 = RandomForestRegressor(**default_args)
+
+        rf1.train(X_train, y_train, exp_type='regression')
+        rf2.fit(X_train, y_train)
+
+        rf1.eval(X_test, y_test, metrics=['r2'])
+        actual_r2 = rf1.getMetric('r2')
+        preds = rf2.predict(X_test)
+        expected_r2 = r2_score(y_test, preds)
+        self.assertEqual( actual_r2, expected_r2 )
 
 
 if __name__ == '__main__':

@@ -20,11 +20,11 @@ class TestSklearnMetricsGenerator(unittest.TestCase):
         y_pred = [0, 2, 1, 3]
 
         expected_acc = 0.5
-        actual_acc = mg.getValue( y_true, y_pred, mtype='accuracy')
+        actual_acc = mg.getValue( y_true, y_pred, mtype='accuracy', exp_type='classification')
         self.assertEqual( actual_acc, expected_acc )
         
         expected_count = 2
-        actual_count = mg.getValue( y_true, y_pred, mtype='acc', normalize=False )
+        actual_count = mg.getValue( y_true, y_pred, mtype='acc', exp_type='classification', normalize=False )
         self.assertEqual( actual_count, expected_count )
 
         # Test sklearn recall
@@ -32,7 +32,7 @@ class TestSklearnMetricsGenerator(unittest.TestCase):
         y_pred = [0, 2, 1, 0, 0, 1]
 
         expected_rec = 1 / 3
-        actual_rec = mg.getValue( y_true, y_pred, mtype='rec' )
+        actual_rec = mg.getValue( y_true, y_pred, mtype='rec', exp_type='classification' )
         self.assertEqual( actual_rec, expected_rec )
 
         # Test sklearn precision
@@ -40,7 +40,7 @@ class TestSklearnMetricsGenerator(unittest.TestCase):
         y_pred = [0, 2, 1, 0, 0, 1]
 
         expected_rec = 2 / 9
-        actual_rec = mg.getValue( y_true, y_pred, mtype='prec' )
+        actual_rec = mg.getValue( y_true, y_pred, mtype='prec', exp_type='classification' )
         self.assertEqual( actual_rec, expected_rec )
 
         # As we add more ML libraries to the mix, add more tests here

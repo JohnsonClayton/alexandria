@@ -1,3 +1,5 @@
+import numpy as np
+
 class Metrics:
     def __init__(self):
         self.metrics = {}
@@ -21,7 +23,7 @@ class Metrics:
 
         # Check the types of the values and add it to the dictionary
         if type(key) == str:
-            if type(value) in [str, int, float]:
+            if type(value) in [str, int, float, np.float64]:
                 self.metrics[key] = value
             else:
                 raise ValueError('value must be string, integer, or float type, not {}'.format( str(type(value)) ))
@@ -47,3 +49,12 @@ class Metrics:
 
     def getPairs(self):
         return self.metrics
+
+    def getMetric(self, key):
+        if type(key) == str:
+            if key in self.metrics:
+                return self.metrics[key]
+            else:
+                raise ValueError('key value \'{}\' not found'.format( str( key ) ) )
+        else:
+            raise ValueError('key value must be string type, not {}'.format( str(type(key)) ))

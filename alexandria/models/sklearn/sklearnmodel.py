@@ -1,4 +1,5 @@
 from alexandria.models import Model
+from alexandria.metrics import Metrics, SklearnMetricsGenerator
 
 class SklearnModel(Model):
     def __init__(self, default_args={}, exp_type='', *args, **kwargs):
@@ -20,6 +21,9 @@ class SklearnModel(Model):
             self.setExperimentType(exp_type)
         else:
             self.exp_type = exp_type
+
+        self.metrics = Metrics()
+        self.mg = SklearnMetricsGenerator()
 
     def getArguments(self):
         return self.default_args
@@ -45,3 +49,33 @@ class SklearnModel(Model):
 
     def predict_proba(self, X):
         return self.model.predict_proba(X)
+
+    def eval(self, X, y, metrics):
+        if type(metrics) == str:
+            preds = self.predict( X )
+            actual = y
+
+            metrics = self.mg.getStandardizedName(metrics)
+            self.metrics.addPair(
+                {
+                    metrics: self.mg.getValue(actual, preds, mtype=metrics, exp_type=self.exp_type) 
+                }
+            )
+        elif type(metrics) == list:
+            preds = self.predict( X )
+            actual = y
+
+            for metric in metrics:
+                metric = self.mg.getStandardizedName(metric)
+                self.metrics.addPair(
+                    {
+                        metric: self.mg.getValue(actual, preds, mtype=metric, exp_type=self.exp_type) 
+                    }
+                )
+        else:
+            raise ValueError('i don\'t know, dude')
+
+    def getMetric(self, metric):
+        return self.metrics.getMetric(
+            self.mg.getStandardizedName(metric)
+            )
