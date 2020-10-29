@@ -215,6 +215,11 @@ class ModelsManager:
             if self.isSklearn( model ):
                 model.train(X, y, exp_type)
 
+    def trainCV(self, X, y, exp_type, metrics, nfolds):
+        for model in self.models.values():
+            if self.isSklearn( model ):
+                model.trainCV(X, y, exp_type, metrics, nfolds)
+
     def generateModelPredictions(self, X):
         preds = dict()
         for id, model in self.models.items():
@@ -225,4 +230,11 @@ class ModelsManager:
                 }
 
         return preds
+
+    def getMetrics(self):
+        metrics = dict()
+        for id, model in self.models.items():
+            metrics[id] = model.getMetrics()
+
+        return metrics
             

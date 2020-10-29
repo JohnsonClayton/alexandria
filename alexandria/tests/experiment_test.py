@@ -372,6 +372,51 @@ class TestExperiment(unittest.TestCase):
         self.assertEqual( actual_predictions[ 7579 ]['name'], 'sklearn.decision tree' )
         self.assertListEqual( actual_predictions[ 7579 ]['predictions'], expected_predictions[ 7579 ]['predictions'] )
 
+        # Ten-fold Cross Validation test
+        data = load_iris()
+        exp = Experiment(
+            name='experiment 1',
+            dataset=iris,
+            xlabels='data',
+            ylabels='target',
+            models=['rf', 'dt']
+        )
+        exp.trainCV(nfolds=10, metrics=['acc', 'prec', 'recall'])
+        actual_results = exp.getMetrics()
+        expected_results = {
+            8444: {
+                'name': 'sklearn.random forest',
+                'Accuracy': {
+                    'avg': 80.0,
+                    'std': 0.0
+                },
+                'Recall': {
+                    'avg': 80.0,
+                    'std': 0.0
+                },
+                'Precision': {
+                    'avg': 80.0,
+                    'std': 0.0
+                }
+            },
+            7579: {
+                'name': 'sklearn.decision tree',
+                'Accuracy': {
+                    'avg': 80.0,
+                    'std': 0.0
+                },
+                'Recall': {
+                    'avg': 80.0,
+                    'std': 0.0
+                },
+                'Precision': {
+                    'avg': 80.0,
+                    'std': 0.0
+                }
+            }
+        }
+
+        self.assertEqual( actual_results, expected_results )
 
 if __name__ == '__main__':
     unittest.main()

@@ -86,13 +86,36 @@ class Experiment:
             X, y = self.dm.getXtrain(), self.dm.getytrain()
             exp_type = self.dm.target_type
         else:
+            # If user provides data, we need to figure out what type of experiment it is
             exp_type = self.dm.getExperimentTypeOf(y)
 
         # Train the models on the provided data
         self.mm.trainModelsOnXy(X, y, exp_type)
+
+    def trainCV(self, X=None, y=None, nfolds=-1, metrics=''):
+        if type(metrics) == type(None):
+            raise ValueError('Metrics must be defined for cross validation!')
+
+        X=X
+        y=y
+        exp_type = ''
+        if type(X) == type(None) or type(y) == type(None):
+            X = self.dm.getX()
+            y = self.dm.gety()
+            exp_type = self.dm.getTargetType()
+        else:
+            # If user provides data, we need to figure out what type of experiment it is
+            exp_type = self.dm.getExperimentTypeOf(y)
+        
+        self.mm.trainCV(X, y, metrics=metrics, nfolds=nfolds, exp_type=exp_type)
 
     def predict(self, X=None):
         if type(X) != type(None):
             return self.mm.generateModelPredictions(X)
         else:
             return self.mm.generateModelPredictions( self.dm.getXtest() )
+
+
+    def getMetrics(self):
+        return self.mm.getMetrics()
+

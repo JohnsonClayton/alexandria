@@ -16,24 +16,29 @@ class RandomForest(SklearnModel):
                 'random_state': 0
             }
         
+    def buildReturnModel(self):
+        model = None
+
+        if self.exp_type:
+            if self.exp_type == 'regression':
+                model = RandomForestRegressor(**self.default_args)
+            elif self.exp_type == 'classification':
+                model = RandomForestClassifier(**self.default_args)
+            else:
+                raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
+        else:
+            raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
+        
+        return model
+
     def train(self, X, y, exp_type=''):
         # if the experiment type is specified, then set it
         if exp_type:
             self.setExperimentType(exp_type)
         
         # Set up the model 
-        if self.exp_type:
-            if self.exp_type == 'regression':
-                self.model = RandomForestRegressor(**self.default_args)
-            elif self.exp_type == 'classification':
-                self.model = RandomForestClassifier(**self.default_args)
-            else:
-                raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
-            
-            # Train the model
-            super().train(X, y)
-        else:
-            raise ValueError('Experiment type argument must be specified for RandomForest - sklearn!')
+        self.model = self.buildReturnModel()
+        super().train(X, y)
         
     def predict_proba(self, X):
         if self.exp_type:

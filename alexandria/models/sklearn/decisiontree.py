@@ -16,24 +16,29 @@ class DecisionTree(SklearnModel):
                 'random_state': 0
             }
         
+    def buildReturnModel(self):
+        model = None
+
+        if self.exp_type:
+            if self.exp_type == 'regression':
+                model = DecisionTreeRegressor(**self.default_args)
+            elif self.exp_type == 'classification':
+                model = DecisionTreeClassifier(**self.default_args)
+            else:
+                raise ValueError('Experiment type argument must be specified for DecisionTree - sklearn!')
+        else:
+            raise ValueError('Experiment type argument must be specified for DecisionTree - sklearn!')
+        
+        return model
+
     def train(self, X, y, exp_type=''):
         # if the experiment type is specified, then set it
         if exp_type:
             self.setExperimentType(exp_type)
         
         # Set up the model 
-        if self.exp_type:
-            if self.exp_type == 'regression':
-                self.model = DecisionTreeRegressor(**self.default_args)
-            elif self.exp_type == 'classification':
-                self.model = DecisionTreeClassifier(**self.default_args)
-            else:
-                raise ValueError('Experiment type argument must be specified for DecisionTree - sklearn!')
-            
-            # Train the model
-            super().train(X, y)
-        else:
-            raise ValueError('Experiment type argument must be specified for DecisionTree - sklearn!')
+        self.model = self.buildReturnModel()
+        super().train(X, y)
         
     def predict_proba(self, X):
         if self.exp_type:

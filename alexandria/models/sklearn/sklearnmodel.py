@@ -1,6 +1,8 @@
 from alexandria.models import Model
 from alexandria.metrics import Metrics, SklearnMetricsGenerator
 
+from abc import abstractmethod
+
 class SklearnModel(Model):
     def __init__(self, default_args={}, exp_type='', *args, **kwargs):
         super().__init__()
@@ -79,3 +81,26 @@ class SklearnModel(Model):
         return self.metrics.getMetric(
             self.mg.getStandardizedName(metric)
             )
+
+    def getMetrics(self):
+        return self.metrics.getPairs()
+
+    def trainCV(self, X, y, exp_type, metrics, nfolds=-1):
+        self.setExperimentType(exp_type)
+        metrics = self.mg.trainCV(
+            model=self.buildReturnModel(), 
+            X=X, 
+            y=y, 
+            exp_type=exp_type, 
+            metrics=metrics, 
+            nfolds=nfolds
+            )
+
+        for metric_name, vals in metrics.items():
+            #print('{}:{}'.format(metric_name, vals))
+            self.metrics.addPair(metric_name, vals)
+
+
+    @abstractmethod
+    def buildReturnModel(self):
+        pass
