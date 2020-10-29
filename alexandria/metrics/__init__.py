@@ -1,5 +1,9 @@
-from .metric import Metric
+from .metrics import Metrics
+from .metrics_generator import MetricsGenerator
+from .sklearn_metrics_generator import SklearnMetricsGenerator
 
 __all__ = [
-    'Metric'
+    'Metrics',
+    'MetricsGenerator',
+    'SklearnMetricsGenerator'
 ]
