@@ -93,8 +93,8 @@ class SklearnMetricsGenerator(MetricsGenerator):
                 metric = self.getStandardizedName(metric)
                 vals = scores[ 'test_{}'.format(metric) ]
                 return_metrics[metric] = {
-                    'avg': np.mean(vals), 
-                    'std': np.std(vals)
+                    'avg': round( np.mean(vals), 4), 
+                    'std': round( np.std(vals), 4)
                 }      
 
         return return_metrics
