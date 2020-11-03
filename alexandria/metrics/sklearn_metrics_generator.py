@@ -64,8 +64,8 @@ class SklearnMetricsGenerator(MetricsGenerator):
         # Standardize the metric names and create scorer object
         scorer = {}
         if type(metrics) == str:
-            metrics = self.getStandardizedName(metrics)
-            scorer[metrics] = self.getScorerObject(metrics, exp_type)
+            metric = self.getStandardizedName(metrics)
+            scorer[metric] = self.getScorerObject(metric, exp_type)
         elif type(metrics) == list:
             for metric in metrics:
                 if type(metric) == str:
@@ -85,8 +85,8 @@ class SklearnMetricsGenerator(MetricsGenerator):
             metrics = self.getStandardizedName(metrics)
             vals = scores[ 'test_{}'.format(metrics) ]
             return_metrics[metrics] = {
-                'avg': np.mean(vals), 
-                'std': np.std(vals)
+                'avg': round( np.mean(vals), 4),
+                'std': round( np.std(vals), 4)
             }
         else:
             for metric in metrics:

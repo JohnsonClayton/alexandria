@@ -1,6 +1,8 @@
 from alexandria.dataset import DatasetManager
 from alexandria.models import ModelsManager
 
+from tabulate import tabulate
+
 class Experiment:
     def __init__(self, name, dataset=None, xlabels=None, ylabels=None, libs=None, models=None, modellibdict=None):
         if type(name) == str:
@@ -115,7 +117,37 @@ class Experiment:
         else:
             return self.mm.generateModelPredictions( self.dm.getXtest() )
 
-
     def getMetrics(self):
         return self.mm.getMetrics()
+
+    def summarizeMetrics(self):
+        # TO-DO: Make this output a lot smarter and more customizable 
+
+        metrics = self.mm.getMetrics()
+
+        # List will hold all the rows for tabulate
+        rows = []
+        headers = []
+
+        # Go through all of the metrics in the dictionary
+        for model_metrics in metrics.values():
+            if type(model_metrics) == dict:
+                # Set up the headers
+                if headers == []:
+                    headers = list( model_metrics.keys() )
+
+                # Initialize the row
+                row = []
+
+                for name, value in model_metrics.items():
+                    # If there is an average and standard deviation, then let's output both
+                    if type(value) == dict and 'avg' in value and 'std' in value:
+                        row.append('{}\u00B1{}'.format( value['avg'], value['std'] ))
+                    else:
+                        row.append(value)
+
+                rows.append(row)
+        print( tabulate( rows, headers=headers ) )
+
+
 
