@@ -149,6 +149,3 @@ class Experiment:
 
                 rows.append(row)
         print( tabulate( rows, headers=headers ) )
-
-
-
