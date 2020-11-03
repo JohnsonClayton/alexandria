@@ -90,7 +90,7 @@ class SklearnMetricsGenerator(MetricsGenerator):
 
         # Run cross_validate
         scores = dict()
-        if type(cv_obj) == None:
+        if type(cv_obj) == type(None):
             scores = cross_validate( model, X, y, scoring=scorer, cv=nfolds )
         else:
             scores = cross_validate( model, X, y, scoring=scorer, cv=cv_obj)
