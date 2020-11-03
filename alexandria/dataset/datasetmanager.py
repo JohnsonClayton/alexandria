@@ -68,14 +68,14 @@ class DatasetManager:
 
     def validateBunchLabels(self):
         # Check to make sure the provided labels are actually within the sklearn.Bunch object
-        if self.xlabels:
+        if type(self.xlabels) != type(None):
             if type(self.xlabels) == list:
                 for xlabel in self.xlabels:
                     if not hasattr(self.dataset, xlabel):
                         raise ValueError('{} is not an attribute of the provided dataset!'.format( self.xlabels ))
             elif type(self.xlabels) == str and not hasattr(self.dataset, self.xlabels):
                 raise ValueError('{} is not an attribute of the provided dataset!'.format( self.xlabels ))
-        if self.ylabels and type(self.ylabels) == str and not hasattr(self.dataset, self.ylabels):
+        if type(self.ylabels) != type(None) and type(self.ylabels) == str and not hasattr(self.dataset, self.ylabels):
             raise ValueError('{} is not an attribute of the provided dataset!'.format( self.ylabels ))
            
     def validatePandasLabels(self):

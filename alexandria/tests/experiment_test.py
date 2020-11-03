@@ -376,7 +376,7 @@ class TestExperiment(unittest.TestCase):
         data = load_iris()
         exp = Experiment(
             name='experiment 1',
-            dataset=iris,
+            dataset=data,
             xlabels='data',
             ylabels='target',
             models=['rf', 'dt']
@@ -412,6 +412,114 @@ class TestExperiment(unittest.TestCase):
                 'Precision': {
                     'avg': 0.9644,
                     'std': 0.0418
+                }
+            }
+        }
+        self.assertEqual( actual_results, expected_results )
+
+        # Check that we get the same results with the pandas.DataFrame
+        data_df = load_iris(as_frame=True).frame
+        data_cols = data_df.columns[:-1]
+        target_col = data_df.columns[-1] # 'target'
+        exp = Experiment(
+            name='experiment 1',
+            dataset=data_df,
+            xlabels=data_cols,
+            ylabels=target_col,
+            models=['rf', 'dt']
+        )
+        exp.trainCV(nfolds=10, metrics=['acc', 'prec', 'recall'])
+        actual_results = exp.getMetrics()
+        expected_results = {
+            8444: {
+                'name': 'sklearn.random forest',
+                'Accuracy': {
+                    'avg': 0.9600,
+                    'std': 0.0442
+                },
+                'Recall': {
+                    'avg': 0.9600,
+                    'std': 0.0442
+                },
+                'Precision': {
+                    'avg': 0.9644,
+                    'std': 0.0418
+                }
+            },
+            7579: {
+                'name': 'sklearn.decision tree',
+                'Accuracy': {
+                    'avg': 0.9600,
+                    'std': 0.0442
+                },
+                'Recall': {
+                    'avg': 0.9600,
+                    'std': 0.0442
+                },
+                'Precision': {
+                    'avg': 0.9644,
+                    'std': 0.0418
+                }
+            }
+        }
+        self.assertEqual( actual_results, expected_results )
+
+        # Check that it works for a regression dataset
+        #  sklearn.Bunch
+        data = load_diabetes()
+        exp = Experiment(
+            name='experiment 1',
+            dataset=data,
+            xlabels='data',
+            ylabels='target',
+            models=['dt', 'rf']
+        )
+        exp.trainCV(nfolds=10, metrics=['r2'])
+        actual_results = exp.getMetrics()
+        expected_results = {
+            8444: {
+                'name': 'sklearn.decision tree',
+                'R2': {
+                    'avg': -0.2044,
+                    'std': 0.2989
+                }
+            },
+            7579: {
+                'name': 'sklearn.random forest',
+                'R2': {
+                    'avg': 0.3963,
+                    'std': 0.1006
+                }
+            }
+        }
+        self.assertEqual( actual_results, expected_results )
+
+        #  pandas.DataFrame
+        data_df = load_diabetes(as_frame=True).frame
+        data_cols = data_df.columns[:-1]
+        target_col = data_df.columns[-1] # 'target'
+        exp = Experiment(
+            name='experiment 1',
+            dataset=data_df,
+            xlabels=data_cols,
+            ylabels=target_col,
+            models=['dt', 'rf']
+        )
+        exp.trainCV(nfolds=10, metrics=['r2'])
+        actual_results = exp.getMetrics()
+        expected_results = {
+            8444: {
+                'name': 'sklearn.decision tree',
+                'R2': {
+                    'avg': -0.2044,
+                    'std': 0.2989
+                }
+            },
+            7579: {
+                'name': 'sklearn.random forest',
+                'R2': {
+                    'avg': 0.3963,
+                    'std': 0.1006
                 }
             }
         }
