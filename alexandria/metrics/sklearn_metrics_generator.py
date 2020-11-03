@@ -1,6 +1,6 @@
 from alexandria.metrics import MetricsGenerator
 
-from sklearn.metrics import accuracy_score, recall_score, precision_score, r2_score, make_scorer
+from sklearn.metrics import accuracy_score, recall_score, precision_score, r2_score, roc_auc_score, make_scorer
 from sklearn.model_selection import cross_validate
 
 import numpy as np
@@ -20,6 +20,7 @@ class SklearnMetricsGenerator(MetricsGenerator):
             raise ValueError('exp_type argument must be string type, not {}'.format(str(type(exp_type))))
 
         value = -1
+        
         if exp_type == 'classification':
             # sklearn implementation for acquiring accuracy
             if mtype == 'Accuracy':
@@ -30,6 +31,8 @@ class SklearnMetricsGenerator(MetricsGenerator):
             # sklearn implementation for acquiring precision
             elif mtype == 'Precision':
                 value = precision_score(y_true, y_pred, average='weighted', *args, **kwargs)
+            elif mtype == 'AUC':
+                value = roc_auc_score(y_true, y_pred, *args, **kwargs)
         elif exp_type == 'regression':
             # sklearn implementation for r squared
             if mtype == 'R2':
@@ -40,8 +43,12 @@ class SklearnMetricsGenerator(MetricsGenerator):
 
         return value
 
+    def custom_auc_score(self, y_true, y_prob):
+        return roc_auc_score(y_true, y_prob, multi_class='ovr', average='weighted')
+
     def getScorerObject(self, metric, exp_type):
         scorer = None
+
         if exp_type == 'classification':
             if metric == 'Accuracy':
                 scorer = make_scorer(accuracy_score)
@@ -49,6 +56,8 @@ class SklearnMetricsGenerator(MetricsGenerator):
                 scorer = make_scorer(recall_score, average='weighted')
             elif metric == 'Precision':
                 scorer = make_scorer(precision_score, average='weighted')
+            elif metric == 'AUC':
+                scorer = make_scorer(self.custom_auc_score, needs_proba=True)
         elif exp_type == 'regression':
             if metric == 'R2':
                 scorer = make_scorer(r2_score)

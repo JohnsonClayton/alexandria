@@ -31,7 +31,7 @@ if __name__ == '__main__':
 		ylabels='target',
 		models=['rf', 'dt', 'knn']
 	)
-	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec'])
+	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec', 'auc'])
 	experiment.summarizeMetrics()
 
 	# Data preprocessing for dataframe object
@@ -50,12 +50,11 @@ if __name__ == '__main__':
 	experiment.summarizeMetrics()
 ```
 ```
-Cross Validation Example #1
-name                   Accuracy       Recall         Precision
----------------------  -------------  -------------  -------------
-sklearn.random forest  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418
-sklearn.decision tree  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418
-sklearn.k neighbors    0.9667±0.0447  0.9667±0.0447  0.9738±0.0339
+name                   Accuracy       Recall         Precision      AUC
+---------------------  -------------  -------------  -------------  -------------
+sklearn.random forest  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418  0.9907±0.0147
+sklearn.decision tree  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418  0.9700±0.0332
+sklearn.k neighbors    0.9667±0.0447  0.9667±0.0447  0.9738±0.0339  0.9873±0.0222
 
 Cross Validation Example #2
 name                   R2

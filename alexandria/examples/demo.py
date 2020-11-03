@@ -13,7 +13,7 @@ if __name__ == '__main__':
 		ylabels='target',
 		models=['rf', 'dt', 'knn']
 	)
-	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec'])
+	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec', 'auc'])
 	experiment.summarizeMetrics()
 
 	# Data preprocessing for dataframe object

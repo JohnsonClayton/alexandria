@@ -4,21 +4,33 @@ class MetricsGenerator:
     def __init__(self):
         # This dictionary contains the acceptable aliases for metric names
         self.metric_name_aliases = {
+            # Add all the aliases for accuracy
             'acc': 'Accuracy',
             'accuracy': 'Accuracy',
             'Accuracy': True,
+
+            # Add all the aliases for r squared
             'r squared': 'R2',
             'rsquared': 'R2',
             'Rsquared': 'R2',
             'RSquared': 'R2',
             'r2': 'R2',
             'R2': True,
+
+            # Add all the aliases for recall
             'rec': 'Recall',
             'recall': 'Recall',
             'Recall': True,
+
+            # Add all the aliases for precision
             'prec': 'Precision',
             'precision': 'Precision',
-            'Precision': True
+            'Precision': True,
+
+            # Add all the aliases for area under the ROC curve
+            'auc': 'AUC',
+            'AuC': 'AUC',
+            'AUC': True
         }
 
     def getStandardizedName(self, name):
