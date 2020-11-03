@@ -45,7 +45,17 @@ class ModelsManager:
             'kNN': 'K Nearest Neighbor',
             'KNearestNeighbor': 'K Nearest Neighbor',
             'kNearestNeighbor': 'K Nearest Neighbor',
-            'K Nearest Neighbor': True
+            'K Nearest Neighbor': True,
+
+            # Enter all the aliases for Naive Bayes
+            'nb': 'Naive Bayes',
+            'NB': 'Naive Bayes',
+            'naive bayes': 'Naive Bayes',
+            'naivebayes': 'Naive Bayes',
+            'NaiveBayes': 'Naive Bayes',
+            'Naivebayes': 'Naive Bayes',
+            'naiveBayes': 'Naive Bayes',
+            'Naive Bayes': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -138,11 +148,19 @@ class ModelsManager:
                         if type(model) == str:
                             self.addModel(lib=lib, model=model)
                         elif type(model) == dict and 'model' in model and 'args' in model:
-                            self.addModel(lib=lib, model=model['model'], default_args=model['args'])
+                            if 'flavor' in model:
+                                self.addModel(lib=lib, model=model['model'], flavor=model['flavor'], default_args=model['args'])
+                            else:
+                                self.addModel(lib=lib, model=model['model'], default_args=model['args'])
+                        elif type(model) == dict and 'model' in model:
+                            if 'flavor' in model:
+                                self.addModel(lib=lib, model=model['model'], flavor=model['flavor'])
+                            else:
+                                self.addModel(lib=lib, model=model['model'])
                 elif type(models) == dict and 'model' in models and 'args' in models:
                             self.addModel(lib=lib, model=models['model'], default_args=models['args'])
                 else:
-                    raise ValueError('models in dictionary must be in string, list (of string), or dictionary types! If in dictionary types, then both \'model\' and \'args\' attributes must be present!')
+                    raise ValueError('models in dictionary must be in string, list (of string), or dictionary types! If in dictionary types, then the \'model\' attribute must be present! Cannot be {}'.format(str(type(models))))
         else:
             raise NotImplementedError('Cannot add models from non-dictionary type. Use Experiment class as intermediary or change to dictionary')    
 
@@ -163,11 +181,12 @@ class ModelsManager:
                     obj = sklearn.DecisionTree
                 elif model == 'K Nearest Neighbor':
                     obj = sklearn.KNeighbors
+                elif model == 'Naive Bayes':
+                    obj = sklearn.NaiveBayes
         else:
-            # We need to try to figure out which one the user wants
+            # TO-DO: We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up
             obj = None
-            
 
         return obj
 

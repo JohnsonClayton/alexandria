@@ -92,7 +92,7 @@ class SklearnModel(Model):
     def trainCV(self, X, y, exp_type, metrics, nfolds=-1, nrepeats=-1):
         # Reset the metrics
         self.metrics.reset()
-        self.metrics.addPair('name', '{}.{}'.format( self.lib, self.model_name ))
+        self.metrics.addPair('name', '{}.{}'.format( self.lib, self.getName() ))
 
         # Collect the new metrics
         self.setExperimentType(exp_type)

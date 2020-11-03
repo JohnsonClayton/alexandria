@@ -6,12 +6,13 @@ if __name__ == '__main__':
 	# Data preprocessing
 	iris = load_iris()
 
+	# Set up the Experiment
 	experiment = Experiment(
 		name='Cross Validation Example #1',
 		dataset=iris,
 		xlabels='data',
 		ylabels='target',
-		models=['rf', 'dt', 'knn']
+		models=['rf', 'dt', 'knn', 'nb']
 	)
 	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec', 'auc'])
 	experiment.summarizeMetrics()
@@ -29,4 +30,39 @@ if __name__ == '__main__':
 		models=['rf', 'dt', 'knn']
 	)
 	experiment.trainCV(nfolds=10, metrics='r2')
+	experiment.summarizeMetrics()
+
+	# Let's run all of the Naive Bayes models and compare their performance
+	models = {
+		'sklearn': [
+			{
+				'model': 'nb',
+				'flavor': 'bernoulli'
+			},
+			{
+				'model': 'nb',
+				'flavor': 'Categorical'
+			},
+			{
+				'model': 'nb',
+				'flavor': 'complement'
+			},
+			{
+				'model': 'nb',
+				'flavor': 'gaussian'
+			},
+			{
+				'model': 'nb',
+				'flavor': 'multi'
+			}
+		]
+	}
+	experiment = Experiment(
+		name='Naive Bayes Experiment',
+		dataset=iris,
+		xlabels='data',
+		ylabels='target',
+		modellibdict=models
+	)
+	experiment.trainCV(nfolds=10, metrics=['acc', 'rec', 'prec', 'auc'])
 	experiment.summarizeMetrics()
