@@ -143,7 +143,7 @@ class Experiment:
                 for name, value in model_metrics.items():
                     # If there is an average and standard deviation, then let's output both
                     if type(value) == dict and 'avg' in value and 'std' in value:
-                        row.append('{}\u00B1{}'.format( value['avg'], value['std'] ))
+                        row.append('{:.4f}\u00B1{:.4f}'.format( value['avg'], value['std'] ))
                     else:
                         row.append(value)
 

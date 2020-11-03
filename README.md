@@ -51,10 +51,10 @@ if __name__ == '__main__':
 ```
 ```
 Cross Validation Example #1
-name                   Accuracy     Recall       Precision
----------------------  -----------  -----------  -------------
-sklearn.random forest  0.96±0.0442  0.96±0.0442  0.9644±0.0418
-sklearn.decision tree  0.96±0.0442  0.96±0.0442  0.9644±0.0418
+name                   Accuracy       Recall         Precision
+---------------------  -------------  -------------  -------------
+sklearn.random forest  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418
+sklearn.decision tree  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418
 sklearn.k neighbors    0.9667±0.0447  0.9667±0.0447  0.9738±0.0339
 
 Cross Validation Example #2
