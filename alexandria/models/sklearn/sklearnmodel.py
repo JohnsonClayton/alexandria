@@ -86,7 +86,10 @@ class SklearnModel(Model):
     def getMetrics(self):
         return self.metrics.getPairs()
 
-    def trainCV(self, X, y, exp_type, metrics, nfolds=-1):
+    def getName(self):
+        return self.model_name
+
+    def trainCV(self, X, y, exp_type, metrics, nfolds=-1, nrepeats=-1):
         # Reset the metrics
         self.metrics.reset()
         self.metrics.addPair('name', '{}.{}'.format( self.lib, self.model_name ))
@@ -99,7 +102,8 @@ class SklearnModel(Model):
             y=y, 
             exp_type=exp_type, 
             metrics=metrics, 
-            nfolds=nfolds
+            nfolds=nfolds,
+            nrepeats=nrepeats
             )
         for metric_name, vals in metrics.items():
             #print('{}:{}'.format(metric_name, vals))

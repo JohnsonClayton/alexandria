@@ -31,6 +31,9 @@ class RandomForest(SklearnModel):
         
         return model
 
+    def getBuiltModel(self):
+        return self.buildReturnModel()
+
     def train(self, X, y, exp_type=''):
         # if the experiment type is specified, then set it
         if exp_type:

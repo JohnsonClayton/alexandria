@@ -1,7 +1,7 @@
 from alexandria.metrics import MetricsGenerator
 
 from sklearn.metrics import accuracy_score, recall_score, precision_score, r2_score, roc_auc_score, make_scorer
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_validate, RepeatedKFold
 
 import numpy as np
 
@@ -69,7 +69,7 @@ class SklearnMetricsGenerator(MetricsGenerator):
 
         return scorer
 
-    def trainCV(self, model, X, y, exp_type, metrics, nfolds=-1):
+    def trainCV(self, model, X, y, exp_type, metrics, nfolds=-1, nrepeats=-1, random_state=0, cv_obj=None):
         # Standardize the metric names and create scorer object
         scorer = {}
         if type(metrics) == str:
@@ -85,9 +85,15 @@ class SklearnMetricsGenerator(MetricsGenerator):
         else:
             raise ValueError('metrics argument must be string or list of strings type, not {}'.format(str(type(metrics))))
 
+        if nrepeats != -1 and nfolds != -1 and type(random_state) == int:
+            cv_obj = RepeatedKFold(n_splits=nfolds, n_repeats=nrepeats, random_state=random_state)
 
         # Run cross_validate
-        scores = cross_validate( model, X, y, scoring=scorer, cv=nfolds )
+        scores = dict()
+        if type(cv_obj) == None:
+            scores = cross_validate( model, X, y, scoring=scorer, cv=nfolds )
+        else:
+            scores = cross_validate( model, X, y, scoring=scorer, cv=cv_obj)
 
         return_metrics = {}
         if type(metrics) == str:

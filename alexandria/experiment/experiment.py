@@ -149,3 +149,17 @@ class Experiment:
 
                 rows.append(row)
         print( tabulate( rows, headers=headers ) )
+
+    def compareModels_tTest(self, a, X=None, y=None):
+        X=X
+        y=y
+        exp_type = ''
+        if type(X) == type(None) or type(y) == type(None):
+            X = self.dm.getX()
+            y = self.dm.gety()
+            exp_type = self.dm.getTargetType()
+        else:
+            # If user provides data, we need to figure out what type of experiment it is
+            exp_type = self.dm.getExperimentTypeOf(y)
+        
+        self.mm.compareModels_tTest(X, y, exp_type=exp_type, a=a)

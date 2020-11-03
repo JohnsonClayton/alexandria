@@ -2,8 +2,18 @@ from alexandria.models import Model, sklearn
 
 import random
 import warnings
+from tabulate import tabulate
+from mlxtend.evaluate import paired_ttest_5x2cv
+
+# Define a custom warning format to prevent output of the line raising the warning
+def msg_only(msg, *args, **kwargs):
+    return str(msg) + '\n'
+
 class ModelsManager:
     def __init__(self, default_library='scikit-learn'):
+        # Set the default warning format to the custom one
+        warnings.formatwarning = msg_only
+
         self.models = {}
 
         
@@ -255,3 +265,89 @@ class ModelsManager:
 
         return metrics
             
+    def compareModels_tTest(self, X, y, exp_type, a=0.05):
+        # Initialize list objects and set up the header row
+        rows = []
+        headers = ['model pairs', 'model1', 'mean1', 'std1', 'model2', 'mean2', 'std2', 't-stat', 'p-val', 'sig/notsig']
+        model_ids = list(self.models.keys())
+        
+        # Initialize bestModel and respective values to the first one we have
+        bestModel = self.models[ model_ids[0] ]
+        bestModel.trainCV(X, y, exp_type=exp_type, nfolds=10, nrepeats=2, metrics='accuracy')
+        bestScores = bestModel.getMetrics()
+        bestAvg = bestScores['Accuracy']['avg']
+        bestStd = bestScores['Accuracy']['std']
+
+        for model_id in model_ids[1:]:
+            # Set up the current model
+            model = self.models[ model_id ]
+
+            # Set the row's first element
+            row = ['{} vs {}'.format( bestModel.getName(), model.getName() )]
+
+            # Train and get the results for the current model
+            model.trainCV(X, y, exp_type=exp_type, nfolds=10, nrepeats=2, metrics='accuracy')
+            modelScores = model.getMetrics()
+            modelAvg = modelScores['Accuracy']['avg']
+            modelStd = modelScores['Accuracy']['std']
+
+            # Compare the scores with the best one so far
+            swap = False
+            if modelAvg > bestAvg:
+                # This is the best classifier so far
+
+                # Add the current model information to the row
+                row.append( model.getName() )
+                row.append( modelAvg )
+                row.append( modelStd )
+
+                # Add the previous best model's information to the row
+                row.append( bestModel.getName() )
+                row.append( bestAvg )
+                row.append( bestStd )
+            
+                # Set the best model as the current one
+                swap = True
+            else:
+                # This model performed worse than the best we've seen so far
+            
+                # Add the previous best model's information to the row
+                row.append( bestModel.getName() )
+                row.append( bestAvg )
+                row.append( bestStd )
+
+                # Add the current model information to the row
+                row.append( model.getName() )
+                row.append( modelAvg )
+                row.append( modelStd )
+
+            # Determine whether the difference in performance is significant
+            t, p = paired_ttest_5x2cv(
+                estimator1=model.getBuiltModel(), 
+                estimator2=bestModel.getBuiltModel(), 
+                X=X, 
+                y=y, 
+                scoring='accuracy',
+                random_seed=0
+                )
+
+            # Add the t, p values to the row
+            row.append('{:.3f}'.format(t))
+            row.append('{:.3f}'.format(p))  
+
+            # Add the significance determination to the row
+            if p <= a:    
+                row.append('sig')
+            else:
+                row.append('notsig')
+
+            # Add the completed row to the list of rows
+            rows.append(row)
+
+            if swap:
+                bestModel = model
+                bestAvg = modelAvg
+                bestStd = modelStd
+
+        # Print the table
+        print( tabulate(rows, headers=headers) )
