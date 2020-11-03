@@ -95,7 +95,7 @@ class Experiment:
         self.mm.trainModelsOnXy(X, y, exp_type)
 
     def trainCV(self, X=None, y=None, nfolds=-1, metrics=''):
-        if type(metrics) == type(None):
+        if type(metrics) == type(None) or metrics == '':
             raise ValueError('Metrics must be defined for cross validation!')
 
         X=X

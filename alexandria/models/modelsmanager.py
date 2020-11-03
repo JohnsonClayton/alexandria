@@ -298,13 +298,13 @@ class ModelsManager:
 
                 # Add the previous best model's information to the row
                 row.append( bestModel.getName() )
-                row.append( bestAvg )
-                row.append( bestStd )
+                row.append( '{:.4f}'.format(bestAvg) )
+                row.append( '{:.4f}'.format(bestStd) )
 
                 # Add the current model information to the row
                 row.append( model.getName() + '*' )
-                row.append( modelAvg )
-                row.append( modelStd )
+                row.append( '{:.4f}'.format(modelAvg) )
+                row.append( '{:.4f}'.format(modelStd) )
             
                 # Set the best model as the current one
                 swap = True
@@ -312,14 +312,14 @@ class ModelsManager:
                 # This model performed worse than the best we've seen so far
             
                 # Add the previous best model's information to the row
-                row.append( bestModel.getName() + '*' )
-                row.append( bestAvg )
-                row.append( bestStd )
+                row.append( bestModel.getName() + '*')
+                row.append( '{:.4f}'.format(bestAvg) )
+                row.append( '{:.4f}'.format(bestStd) )
 
                 # Add the current model information to the row
                 row.append( model.getName() )
-                row.append( modelAvg )
-                row.append( modelStd )
+                row.append( '{:.4f}'.format(modelAvg) )
+                row.append( '{:.4f}'.format(modelStd) )
 
             # Determine whether the difference in performance is significant
             t, p = paired_ttest_5x2cv(
