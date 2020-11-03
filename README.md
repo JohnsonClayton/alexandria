@@ -29,7 +29,7 @@ if __name__ == '__main__':
 		dataset=iris,
 		xlabels='data',
 		ylabels='target',
-		models=['rf', 'dt']
+		models=['rf', 'dt', 'knn']
 	)
 	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec'])
 	experiment.summarizeMetrics()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 		dataset=diabetes_df,
 		xlabels=data_cols,
 		ylabels=target_col,
-		models=['rf', 'dt']
+		models=['rf', 'dt', 'knn']
 	)
 	experiment.trainCV(nfolds=10, metrics='r2')
 	experiment.summarizeMetrics()
@@ -55,10 +55,12 @@ name                   Accuracy     Recall       Precision
 ---------------------  -----------  -----------  -------------
 sklearn.random forest  0.96±0.0442  0.96±0.0442  0.9644±0.0418
 sklearn.decision tree  0.96±0.0442  0.96±0.0442  0.9644±0.0418
+sklearn.k neighbors    0.9667±0.0447  0.9667±0.0447  0.9738±0.0339
 
 Cross Validation Example #2
 name                   R2
 ---------------------  --------------
 sklearn.random forest  0.3963±0.1006
 sklearn.decision tree  -0.2044±0.2989
+sklearn.k neighbors    0.3329±0.1247
 ```

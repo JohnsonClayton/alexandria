@@ -11,7 +11,7 @@ if __name__ == '__main__':
 		dataset=iris,
 		xlabels='data',
 		ylabels='target',
-		models=['rf', 'dt']
+		models=['rf', 'dt', 'knn']
 	)
 	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec'])
 	experiment.summarizeMetrics()
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 		dataset=diabetes_df,
 		xlabels=data_cols,
 		ylabels=target_col,
-		models=['rf', 'dt']
+		models=['rf', 'dt', 'knn']
 	)
 	experiment.trainCV(nfolds=10, metrics='r2')
 	experiment.summarizeMetrics()
