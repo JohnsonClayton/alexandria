@@ -4,7 +4,6 @@ from alexandria.experiment import Experiment
 
 if __name__ == '__main__':
 	# Data preprocessing
-	print('With sklearn.Bunch object...')
 	iris = load_iris()
 
 	experiment = Experiment(
@@ -18,7 +17,6 @@ if __name__ == '__main__':
 	experiment.summarizeMetrics()
 
 	# Data preprocessing for dataframe object
-	print('With pandas.DataFrame object...')
 	diabetes_df = load_diabetes(as_frame=True).frame
 	data_cols = diabetes_df.columns[:-1] # All columns, but the last one is the target
 	target_col = diabetes_df.columns[-1] # 'target'

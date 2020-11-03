@@ -14,51 +14,51 @@ This will call the `setup.py` script and will attempt to install the package ont
 An example for the API is below:
 
 ```python
-# main.py - DataBunch and DataFrame demonstrations
+# examples/demo.py - DataBunch and DataFrame demonstrations
 # Data preprocessing
-print('With sklearn DataBunch object...')
-iris = load_iris()
-X, y = iris.data, iris.target
+from sklearn.datasets import load_iris, load_diabetes
 
-experiment = Experiment('iris example experiment', models=['rf', 'dt', 'ab', 'knn'], exp_type='classification')
-experiment.train(
-    X, 
-    y, 
-    metrics=['acc', 'rec', 'prec'], 
-    cv=True, 
-    n_folds=10, 
-    shuffle=True)
-experiment.summarizeMetrics()
+from alexandria.experiment import Experiment
 
-# Data preprocessing for dataframe object
-print('With pandas DataFrame object...')
-iris_df = load_iris(as_frame=True).frame
-X = iris_df.loc[:, iris_df.columns != 'target']
-y = iris_df['target']
+if __name__ == '__main__':
+	# Data preprocessing
+	iris = load_iris()
 
-experiment = Experiment('iris example experiment', models=['rf', 'dt', 'ab', 'knn'], exp_type='classification')
-experiment.train(
-    X, 
-    y, 
-    metrics=['acc', 'rec', 'prec'], 
-    cv=True, 
-    n_folds=10, 
-    shuffle=True)
-experiment.summarizeMetrics()
+	experiment = Experiment(
+		name='Cross Validation Example #1',
+		dataset=iris,
+		xlabels='data',
+		ylabels='target',
+		models=['rf', 'dt']
+	)
+	experiment.trainCV(nfolds=10, metrics=['accuracy', 'rec', 'prec'])
+	experiment.summarizeMetrics()
+
+	# Data preprocessing for dataframe object
+	diabetes_df = load_diabetes(as_frame=True).frame
+	data_cols = diabetes_df.columns[:-1] # All columns, but the last one is the target
+	target_col = diabetes_df.columns[-1] # 'target'
+
+	experiment = Experiment(
+		name='Cross Validation Example #2',
+		dataset=diabetes_df,
+		xlabels=data_cols,
+		ylabels=target_col,
+		models=['rf', 'dt']
+	)
+	experiment.trainCV(nfolds=10, metrics='r2')
+	experiment.summarizeMetrics()
 ```
 ```
-With sklearn DataBunch object...
-model    acc            rec            prec
--------  -------------  -------------  -------------
-rf       0.9400±0.0467  0.9400±0.0467  0.9532±0.0341
-dt       0.9400±0.0554  0.9400±0.0554  0.9542±0.0362
-ab       0.9267±0.0554  0.9267±0.0554  0.9414±0.0447
-knn      0.9533±0.0306  0.9533±0.0306  0.9611±0.0255
-With pandas DataFrame object...
-model    acc            rec            prec
--------  -------------  -------------  -------------
-rf       0.9400±0.0467  0.9400±0.0467  0.9532±0.0341
-dt       0.9400±0.0554  0.9400±0.0554  0.9542±0.0362
-ab       0.9267±0.0554  0.9267±0.0554  0.9414±0.0447
-knn      0.9533±0.0306  0.9533±0.0306  0.9611±0.0255
+Cross Validation Example #1
+name                   Accuracy     Recall       Precision
+---------------------  -----------  -----------  -------------
+sklearn.random forest  0.96±0.0442  0.96±0.0442  0.9644±0.0418
+sklearn.decision tree  0.96±0.0442  0.96±0.0442  0.9644±0.0418
+
+Cross Validation Example #2
+name                   R2
+---------------------  --------------
+sklearn.random forest  0.3963±0.1006
+sklearn.decision tree  -0.2044±0.2989
 ```

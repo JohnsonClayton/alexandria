@@ -122,6 +122,7 @@ class Experiment:
 
     def summarizeMetrics(self):
         # TO-DO: Make this output a lot smarter and more customizable 
+        print('\n' + self.name)
 
         metrics = self.mm.getMetrics()
 
