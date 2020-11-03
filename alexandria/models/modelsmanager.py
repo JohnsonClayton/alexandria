@@ -296,15 +296,15 @@ class ModelsManager:
             if modelAvg > bestAvg:
                 # This is the best classifier so far
 
-                # Add the current model information to the row
-                row.append( model.getName() )
-                row.append( modelAvg )
-                row.append( modelStd )
-
                 # Add the previous best model's information to the row
                 row.append( bestModel.getName() )
                 row.append( bestAvg )
                 row.append( bestStd )
+
+                # Add the current model information to the row
+                row.append( model.getName() + '*' )
+                row.append( modelAvg )
+                row.append( modelStd )
             
                 # Set the best model as the current one
                 swap = True
@@ -312,7 +312,7 @@ class ModelsManager:
                 # This model performed worse than the best we've seen so far
             
                 # Add the previous best model's information to the row
-                row.append( bestModel.getName() )
+                row.append( bestModel.getName() + '*' )
                 row.append( bestAvg )
                 row.append( bestStd )
 
@@ -332,8 +332,8 @@ class ModelsManager:
                 )
 
             # Add the t, p values to the row
-            row.append('{:.3f}'.format(t))
-            row.append('{:.3f}'.format(p))  
+            #row.append('{:.3f}'.format(t))
+            #row.append('{:.3f}'.format(p))  
 
             # Add the significance determination to the row
             if p <= a:    

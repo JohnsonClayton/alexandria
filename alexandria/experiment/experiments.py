@@ -107,3 +107,15 @@ class Experiments:
             self.removeExperiment(exp_names)
         else:
             raise ValueError('Argument must be list or string type, not {}'.format( str( type(exp_names) ) ) )
+
+    def trainCV(self, X=None, y=None, nfolds=-1, metrics=''):
+        for exp in self.exp_list:
+            exp.trainCV(X=X, y=y, nfolds=nfolds, metrics=metrics)
+
+    def train(self, *args, **kwargs):
+        for exp in self.exp_list:
+            exp.train(*args, **kwargs)
+
+    def summarizeMetrics(self):
+        for exp in self.exp_list:
+            exp.summarizeMetrics()
