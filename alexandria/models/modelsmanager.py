@@ -11,16 +11,31 @@ class ModelsManager:
         #   In this set up, if the key 'x' points to a string, then it is an alias.
         #   If the provided key points to True, then the key is a legit library/model name
         self.lib_aliases = {
+            # Enter all the aliases for scikit-learn
             'sklearn':'scikit-learn',
             'scikit-learn': True
         }
         self.model_aliases = {
+            # Enter all the aliases for Random Forest
             'rf': 'Random Forest',
             'random forest': 'Random Forest',
             'Random Forest': True,
+
+            # Enter all the aliases for Decision Tree
             'dt': 'Decision Tree',
             'decision tree': 'Decision Tree',
-            'Decision Tree': True
+            'Decision Tree': True,
+
+            # Enter all the aliases for kNearest Neighbor
+            'knn': 'K Nearest Neighbor',
+            'knearest': 'K Nearest Neighbor',
+            'knearestneighbor': 'K Nearest Neighbor',
+            'kneighbor': 'K Nearest Neighbor',
+            'KNN': 'K Nearest Neighbor',
+            'kNN': 'K Nearest Neighbor',
+            'KNearestNeighbor': 'K Nearest Neighbor',
+            'kNearestNeighbor': 'K Nearest Neighbor',
+            'K Nearest Neighbor': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -136,6 +151,8 @@ class ModelsManager:
                    obj = sklearn.RandomForest
                 elif model == 'Decision Tree':
                     obj = sklearn.DecisionTree
+                elif model == 'K Nearest Neighbor':
+                    obj = sklearn.KNeighbors
         else:
             # We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up
