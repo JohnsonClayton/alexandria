@@ -268,7 +268,7 @@ class ModelsManager:
     def compareModels_tTest(self, X, y, exp_type, a=0.05):
         # Initialize list objects and set up the header row
         rows = []
-        headers = ['model pairs', 'model1', 'mean1', 'std1', 'model2', 'mean2', 'std2', 't-stat', 'p-val', 'sig/notsig']
+        headers = ['model pairs', 'model1', 'mean1', 'std1', 'model2', 'mean2', 'std2', 'sig/notsig']
         model_ids = list(self.models.keys())
         
         # Initialize bestModel and respective values to the first one we have
