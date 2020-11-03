@@ -7,6 +7,7 @@ class SklearnModel(Model):
     def __init__(self, default_args={}, exp_type='', *args, **kwargs):
         super().__init__()
         self.lib = 'sklearn'
+        self.model_name = 'na'
 
         # Make sure that the default arguments are valid (Ex. {'random_state':20})
         if type(default_args) == dict:
@@ -86,6 +87,11 @@ class SklearnModel(Model):
         return self.metrics.getPairs()
 
     def trainCV(self, X, y, exp_type, metrics, nfolds=-1):
+        # Reset the metrics
+        self.metrics.reset()
+        self.metrics.addPair('name', '{}.{}'.format( self.lib, self.model_name ))
+
+        # Collect the new metrics
         self.setExperimentType(exp_type)
         metrics = self.mg.trainCV(
             model=self.buildReturnModel(), 
@@ -95,7 +101,6 @@ class SklearnModel(Model):
             metrics=metrics, 
             nfolds=nfolds
             )
-
         for metric_name, vals in metrics.items():
             #print('{}:{}'.format(metric_name, vals))
             self.metrics.addPair(metric_name, vals)

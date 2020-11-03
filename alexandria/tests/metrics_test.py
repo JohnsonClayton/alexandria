@@ -72,16 +72,7 @@ class TestMetrics(unittest.TestCase):
 
             fail(self)
         except ValueError as ve:
-            self.assertEqual( str(ve), 'value must be string, integer, or float type, not {}'.format( str( type(list(p1.values())[0]) ) ) )
-
-        m = Metrics()
-        try:
-            p1 = {'key': {'key': 512}}
-            m.addPair(p1)
-
-            fail(self)
-        except ValueError as ve:
-            self.assertEqual( str(ve), 'value must be string, integer, or float type, not {}'.format( str( type(list(p1.values())[0]) ) ) )
+            self.assertEqual( str(ve), 'value must be string, integer, float, or dict type, not {}'.format( str( type(list(p1.values())[0]) ) ) )
 
         # Fail if provided dictionary with more than one value
         m = Metrics()

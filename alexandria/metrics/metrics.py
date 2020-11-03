@@ -58,3 +58,6 @@ class Metrics:
                 raise ValueError('key value \'{}\' not found'.format( str( key ) ) )
         else:
             raise ValueError('key value must be string type, not {}'.format( str(type(key)) ))
+
+    def reset(self):
+        self.__init__()

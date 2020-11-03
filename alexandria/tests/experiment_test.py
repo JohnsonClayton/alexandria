@@ -387,35 +387,34 @@ class TestExperiment(unittest.TestCase):
             8444: {
                 'name': 'sklearn.random forest',
                 'Accuracy': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9600,
+                    'std': 0.0442
                 },
                 'Recall': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9600,
+                    'std': 0.0442
                 },
                 'Precision': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9644,
+                    'std': 0.0418
                 }
             },
             7579: {
                 'name': 'sklearn.decision tree',
                 'Accuracy': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9600,
+                    'std': 0.0442
                 },
                 'Recall': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9600,
+                    'std': 0.0442
                 },
                 'Precision': {
-                    'avg': 80.0,
-                    'std': 0.0
+                    'avg': 0.9644,
+                    'std': 0.0418
                 }
             }
         }
-
         self.assertEqual( actual_results, expected_results )
 
 if __name__ == '__main__':
