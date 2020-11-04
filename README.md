@@ -9,9 +9,9 @@ $ make
 ```  
 This will call the `setup.py` script and will attempt to install the package onto your system. If you find any issues, please create one and I'll get on to it. I haven't done these sorts of things before, so bugs are expected.   
 
-### Example
-
-An example for the API is below:
+### Examples
+#### Basic Classification
+A basic example for the API is below:
 
 ```python
 # examples/demo.py - DataBunch and DataFrame demonstrations
@@ -43,6 +43,8 @@ sklearn.decision tree  0.9600±0.0442  0.9600±0.0442  0.9644±0.0418  0.9700±0
 sklearn.k neighbors    0.9667±0.0447  0.9667±0.0447  0.9738±0.0339  0.9873±0.0222
 sklearn.naive bayes.Gaussian  0.9533±0.0427  0.9533±0.0427  0.9627±0.0325  0.9947±0.0088
 ```
+
+#### Basic Regression with Pandas DataFrame
 ```python
 	# Data preprocessing for dataframe object
 	diabetes_df = load_diabetes(as_frame=True).frame
@@ -68,6 +70,8 @@ sklearn.random forest  0.3963±0.1006
 sklearn.decision tree  -0.2044±0.2989
 sklearn.k neighbors    0.3329±0.1247
 ```
+#### Naive Bayes Flavors Comparison
+Code: 
 ```python
 # Let's run all of the Naive Bayes models and compare their performance
 	models = {
