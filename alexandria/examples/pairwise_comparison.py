@@ -12,7 +12,8 @@ if __name__ == '__main__':
         models=[
             'rf',
             'dt',
-            'knn'
+            'knn',
+            'nb'
         ]
     )
 
