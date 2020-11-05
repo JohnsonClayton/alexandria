@@ -16,7 +16,8 @@ if __name__ == '__main__':
             'nb',
             'da',
             'ab',
-            'gb'
+            'gb',
+            'lr'
         ]
     )
 

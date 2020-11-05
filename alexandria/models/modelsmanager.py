@@ -81,7 +81,15 @@ class ModelsManager:
             'GradientBoost': 'Gradient Boost',
             'GRADIENTBOOST': 'Gradient Boost',
             'GRADIENT BOOST': 'Gradient Boost',
-            'Gradient Boost': True
+            'Gradient Boost': True,
+
+            # Enter all the aliases for Linear Regression
+            'lr': 'Logistic Regression',
+            'LR': 'Logistic Regression',
+            'Logistic regression': 'Logistic Regression',
+            'Logisticregression': 'Logistic Regression',
+            'LogisticRegression': 'Logistic Regression',
+            'Logistic Regression': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -215,6 +223,8 @@ class ModelsManager:
                     obj = sklearn.AdaBoost
                 elif model == 'Gradient Boost':
                     obj = sklearn.GradientBoost
+                elif model == 'Logistic Regression':
+                    obj = sklearn.LogisticRegression
         else:
             # TO-DO: We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up
