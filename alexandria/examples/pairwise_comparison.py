@@ -14,7 +14,9 @@ if __name__ == '__main__':
             'dt',
             'knn',
             'nb',
-            'da'
+            'da',
+            'ab',
+            'gb'
         ]
     )
 

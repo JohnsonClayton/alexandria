@@ -4,6 +4,8 @@ from .decisiontree import DecisionTree
 from .kneighbors import KNeighbors
 from .naivebayes import NaiveBayes
 from .discriminantanalysis import DiscriminantAnalysis
+from .adaboost import AdaBoost
+from .gradientboost import GradientBoost
 
 __all__ = [
     'SklearnModel',
@@ -11,5 +13,7 @@ __all__ = [
     'DecisionTree',
     'KNeighbors',
     'NaiveBayes',
-    'DiscriminantAnalysis'
+    'DiscriminantAnalysis',
+    'AdaBoost',
+    'GradientBoost'
 ]

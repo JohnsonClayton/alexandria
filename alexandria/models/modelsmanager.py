@@ -63,7 +63,25 @@ class ModelsManager:
             'discriminantanalysis': 'Discriminant Analysis',
             'DiscriminantAnalysis': 'Discriminant Analysis',
             'DA': 'Discriminant Analysis',
-            'Discriminant Analysis': True
+            'Discriminant Analysis': True,
+
+            # Enter all the aliases for AdaBoost
+            'ab': 'AdaBoost', 
+            'AB': 'AdaBoost',
+            'adaboost': 'AdaBoost',
+            'ADABOOST': 'AdaBoost',
+            'Adaboost': 'AdaBoost',
+            'AdaBoost': True,
+
+            # Enter all the aliases for Gradient Boost
+            'gb': 'Gradient Boost',
+            'GB': 'Gradient Boost',
+            'gradientboost': 'Gradient Boost',
+            'gradient boost': 'Gradient Boost',
+            'GradientBoost': 'Gradient Boost',
+            'GRADIENTBOOST': 'Gradient Boost',
+            'GRADIENT BOOST': 'Gradient Boost',
+            'Gradient Boost': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -193,6 +211,10 @@ class ModelsManager:
                     obj = sklearn.NaiveBayes
                 elif model == 'Discriminant Analysis':
                     obj = sklearn.DiscriminantAnalysis
+                elif model == 'AdaBoost':
+                    obj = sklearn.AdaBoost
+                elif model == 'Gradient Boost':
+                    obj = sklearn.GradientBoost
         else:
             # TO-DO: We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up
