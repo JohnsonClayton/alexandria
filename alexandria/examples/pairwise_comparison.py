@@ -13,7 +13,8 @@ if __name__ == '__main__':
             'rf',
             'dt',
             'knn',
-            'nb'
+            'nb',
+            'da'
         ]
     )
 

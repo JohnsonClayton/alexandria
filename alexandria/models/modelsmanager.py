@@ -55,7 +55,15 @@ class ModelsManager:
             'NaiveBayes': 'Naive Bayes',
             'Naivebayes': 'Naive Bayes',
             'naiveBayes': 'Naive Bayes',
-            'Naive Bayes': True
+            'Naive Bayes': True,
+
+            # Enter all the aliases for Discriminant Analysis
+            'da': 'Discriminant Analysis',
+            'discriminant analysis': 'Discriminant Analysis',
+            'discriminantanalysis': 'Discriminant Analysis',
+            'DiscriminantAnalysis': 'Discriminant Analysis',
+            'DA': 'Discriminant Analysis',
+            'Discriminant Analysis': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -183,6 +191,8 @@ class ModelsManager:
                     obj = sklearn.KNeighbors
                 elif model == 'Naive Bayes':
                     obj = sklearn.NaiveBayes
+                elif model == 'Discriminant Analysis':
+                    obj = sklearn.DiscriminantAnalysis
         else:
             # TO-DO: We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up

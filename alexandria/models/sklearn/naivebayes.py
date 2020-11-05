@@ -97,7 +97,3 @@ class NaiveBayes(SklearnModel):
         # Set up the model 
         self.model = self.buildReturnModel()
         super().train(X, y)
-        
-    def predict_proba(self, X):
-        return super().predict_proba(X)
- 

@@ -66,3 +66,26 @@ if __name__ == '__main__':
 	)
 	experiment.trainCV(nfolds=10, metrics=['acc', 'rec', 'prec', 'auc'])
 	experiment.summarizeMetrics()
+
+		# Let's run all of the Discriminant Analysis models and compare their performance
+	models = {
+		'sklearn': [
+			{
+				'model': 'da',
+				'flavor': 'linear'
+			},
+			{
+				'model': 'discriminant analysis',
+				'flavor': 'Quadratic'
+			}
+		]
+	}
+	experiment = Experiment(
+		name='Discriminant Analysis Experiment',
+		dataset=iris,
+		xlabels='data',
+		ylabels='target',
+		modellibdict=models
+	)
+	experiment.trainCV(nfolds=10, metrics=['acc', 'rec', 'prec', 'auc'])
+	experiment.summarizeMetrics()
