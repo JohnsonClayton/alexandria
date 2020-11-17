@@ -1,5 +1,7 @@
 from .experiment import Experiment
 
+import time
+
 class Experiments:
     def __init__(self, num=0, experiments=[]):
         self.exp_list = []
@@ -108,13 +110,24 @@ class Experiments:
         else:
             raise ValueError('Argument must be list or string type, not {}'.format( str( type(exp_names) ) ) )
 
-    def trainCV(self, X=None, y=None, nfolds=-1, metrics=''):
+    def trainCV(self, X=None, y=None, nfolds=-1, metrics='', reportduring=False):
         for exp in self.exp_list:
+            print('Running {}'.format(exp.name), end='...')
+            t0 = time.time()
             exp.trainCV(X=X, y=y, nfolds=nfolds, metrics=metrics)
+            t1 = time.time()
+            print('done (this took {:.2f} sec)'.format( t1-t0 ))
+
+            if type(reportduring) == bool and reportduring:
+                exp.summarizeMetrics()
 
     def train(self, *args, **kwargs):
         for exp in self.exp_list:
+            print('Running {}'.format(exp.name), end='...')
+            t0 = time.time()
             exp.train(*args, **kwargs)
+            t1 = time.time()
+            print('done (this took {:.2f} sec)'.format( t1-t0 ))
 
     def summarizeMetrics(self):
         for exp in self.exp_list:
