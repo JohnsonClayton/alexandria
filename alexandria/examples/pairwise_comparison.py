@@ -17,7 +17,8 @@ if __name__ == '__main__':
             'da',
             'ab',
             'gb',
-            'lr'
+            'lr',
+            'xgb'
         ]
     )
 

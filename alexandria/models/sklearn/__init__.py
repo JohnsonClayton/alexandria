@@ -6,6 +6,7 @@ from .naivebayes import NaiveBayes
 from .discriminantanalysis import DiscriminantAnalysis
 from .adaboost import AdaBoost
 from .gradientboost import GradientBoost
+from .extremegradientboost import ExtremeGradientBoost
 from .logisticregression import LogisticRegression
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     'DiscriminantAnalysis',
     'AdaBoost',
     'GradientBoost',
+    'ExtremeGradientBoost',
     'LogisticRegression'
 ]

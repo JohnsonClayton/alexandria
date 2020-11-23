@@ -83,6 +83,15 @@ class ModelsManager:
             'GRADIENT BOOST': 'Gradient Boost',
             'Gradient Boost': True,
 
+            # Enter all the aliass for Extreme Gradient Boost
+            'xgb': 'Extreme Gradient Boost',
+            'XGB': 'Extreme Gradient Boost',
+            'extreme gradient boost': 'Extreme Gradient Boost',
+            'EXTREME GRADIENT BOOST': 'Extreme Gradient Boost',
+            'ExtremeGradientBoost': 'Extreme Gradient Boost',
+            'extremegradientboost': 'Extreme Gradient Boost',
+            'Extreme Gradient Boost': True,
+
             # Enter all the aliases for Linear Regression
             'lr': 'Logistic Regression',
             'LR': 'Logistic Regression',
@@ -223,6 +232,8 @@ class ModelsManager:
                     obj = sklearn.AdaBoost
                 elif model == 'Gradient Boost':
                     obj = sklearn.GradientBoost
+                elif model == 'Extreme Gradient Boost':
+                    obj = sklearn.ExtremeGradientBoost
                 elif model == 'Logistic Regression':
                     obj = sklearn.LogisticRegression
         else:
