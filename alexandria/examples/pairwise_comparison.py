@@ -18,7 +18,8 @@ if __name__ == '__main__':
             'ab',
             'gb',
             'lr',
-            'xgb'
+            'xgb',
+            'svm'
         ]
     )
 

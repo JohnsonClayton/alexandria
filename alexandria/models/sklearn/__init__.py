@@ -8,6 +8,7 @@ from .adaboost import AdaBoost
 from .gradientboost import GradientBoost
 from .extremegradientboost import ExtremeGradientBoost
 from .logisticregression import LogisticRegression
+from .supportvectormachine import SupportVectorMachine
 
 __all__ = [
     'SklearnModel',
@@ -19,5 +20,6 @@ __all__ = [
     'AdaBoost',
     'GradientBoost',
     'ExtremeGradientBoost',
-    'LogisticRegression'
+    'LogisticRegression',
+    'SupportVectorMachine'
 ]

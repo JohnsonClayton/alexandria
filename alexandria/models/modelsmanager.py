@@ -98,7 +98,16 @@ class ModelsManager:
             'Logistic regression': 'Logistic Regression',
             'Logisticregression': 'Logistic Regression',
             'LogisticRegression': 'Logistic Regression',
-            'Logistic Regression': True
+            'Logistic Regression': True,
+
+            # Enter all the aliases for Support Vector Machine
+            'svm': 'Support Vector Machine',
+            'SVM': 'Support Vector Machine',
+            'support vector machine': 'Support Vector Machine',
+            'supportvectormachine': 'Support Vector Machine',
+            'SUPPORT VECTOR MACHINE': 'Support Vector Machine',
+            'SUPPORTVECTORMACHINE': 'Support Vector Machine',
+            'Support Vector Machine': True
         }
 
         # Seed the random number generator, we just need random number for ids
@@ -236,6 +245,8 @@ class ModelsManager:
                     obj = sklearn.ExtremeGradientBoost
                 elif model == 'Logistic Regression':
                     obj = sklearn.LogisticRegression
+                elif model == 'Support Vector Machine':
+                    obj = sklearn.SupportVectorMachine
         else:
             # TO-DO: We need to try to figure out which one the user wants
             #  we should output all of the ones we may think match up
